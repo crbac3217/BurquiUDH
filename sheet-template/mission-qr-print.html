@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>히든미션 QR 인쇄용</title>
+<style>
+  body { font-family: sans-serif; padding: 24px; }
+  h1 { font-size: 18px; }
+  p { font-size: 13px; color: #555; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .card {
+    border: 1px dashed #999;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    page-break-inside: avoid;
+  }
+  .card img { width: 100%; height: auto; }
+  .chip-id {
+    margin-top: 6px;
+    font-weight: bold;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+  }
+  @media print {
+    p { display: none; }
+  }
+</style>
+</head>
+<body>
+  <h1>운동회 히든미션 QR (자르는 선 기준으로 오려서 현장에 숨기세요)</h1>
+  <p>미션 내용은 여기 안 보여요 — MissionChips 시트에서만 확인 가능. 참가자는 스캔해야 무슨 미션인지 알 수 있어요.</p>
+  <div class="grid">
+      <div class="card">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6AQAAAACgl2eQAAABjUlEQVR4nO1ZQWrEMAwc2YYeHegD+pTkZ/1a8qP4WHBQkex020uoobBy4zloE+8QhCLJI4cYl9jc9f/AIBSMOPxhHBJVLDgIGwWcC2GEui3UnhVACqD3HcCsC3I1krYtaankX2TG9pZR8nRpecIFbkk4SBPzqT78C0J6OWv6eT50TmBmqemYUWs6MvNqzEnjhFBrWpFec1WRZcUbcdL1QKAfyvyQwPoaTsVQ5i16MoAWNboSde8OwDb99gnXuAkhqOVt0uz0JUNpXj+IkUK24aTrqE/O+wTtjSzNUgwT4m7ESdcDAafs8cyrKHMZb+qMI1gtOOk6IcQMzDukT34pc2mbNPpkY04+sEufjBm8ipHbkZPt1Q05t6hBLBO4lvio7pYdxxcBSWXvTgG8LQQ21YI6OwtKIip1ZIzMqjEtOdkTIere41k3oHq+Zs5Jq4Tw/SbJ3F31pJihzNtnHCiiTDbIMuNkbZtGXrfrhXCUrzaPCbyISi1xM06aJwRRPDihV1l+qrHhpBsExU3i8An+ZbgsqOnw0wAAAABJRU5ErkJggg==" alt="M01" />
+        <div class="chip-id">M01</div>
+      </div>
+      <div class="card">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6AQAAAACgl2eQAAABa0lEQVR4nO1YwWrDMAx9cgw7OrAP2KfEn978UXwsOGhItrf1Epp1DLuVDsJxRXk8JPlJxDi01R3/DlhAMePhD3lIVC0CoJg82oU3qs9RPbGacgqEDCx6sd39D4f2UgFU8k9IRJJTqinaE8gDs4Bn4sH//EgzGOnfMbgnCmBmKezAXGs6MPOlM5AD5ORO9SO956oiy83UCUg3QoCX/EOzDF7nCdwZSDdIQPJVRUbsRPHrAV/njkCOkZO5HHmlqWQjLZcrMZLPfYB0IwSgivLQ6ORNhPomnOqz0wNIN0rATvpOf3NKMVwJi80456dFiNNRu804b2x98jfVXa3UdAZfxGmdW3WfYHJrx4UridoiyxrDmDyjzKfy2pCWuFzxGqmJyl6a+Vi7oFS3ahR1btSO2Q/IkQKCrCalWeqzvX7kHkGOsguCDN9cnSnzB3ZBqNWdQWTT4nllfiMlmzNl/tguCDeujxbkLEDtRXj4BOn7tMjPNeVkAAAAAElFTkSuQmCC" alt="M02" />
+        <div class="chip-id">M02</div>
+      </div>
+      <div class="card">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6AQAAAACgl2eQAAABiklEQVR4nO1YW2rDMBCclQX5lCEH6FGco9tH6Q2iz4DNlF2pLvQjxGkpq0b7oazkISzjkfchxF1bwv3nQAcU6zz8Ig9Zql1yRFmqxU7140xGAMNqriDdhMAKTLMe5HNn8qhopehPvYv9qE6L168/nuAhn4hl/Mk/vDAgftsTOa5/HEP4R0yy7jYBkhKZ9CR7CTK0AthKptbcQ0zvEVjsYPQUpHtArPozy5twGYddol6CDC0AQF4H2lI0WW73/mD2EGRoAQCSRp3SyRWc1ZsTlVN2Jo9RPSh1K0TGqkm5ZBHOufc4hzVJ7WnIK4BJJTrZZe+aPJhx8gjRllFqPakpO+0to4dPUGgEkPQLqcJUTdYe0V2Q/gEod9pM77RtP4ntuft4xlGDzoKwaNqx5nt5W5287tBOtyhltJbPFKSrbk8UQDtwD0GG5gDpVmofzub5DLKNWdCwazJCJnoJMrQDYG10LAFtUuvJXpk/PQvKqlBbtJ4sM18/r7ulWRD20eTXzNJDkKEDzF6Ehw92NbLRoLm5wQAAAABJRU5ErkJggg==" alt="M03" />
+        <div class="chip-id">M03</div>
+      </div>
+      <div class="card">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6AQAAAACgl2eQAAABi0lEQVR4nO1YQW7EIAy0CXeQ8oB9Cvuzqj8LT9kfhGMkIlfGpM1hFTWrqjUNPiAgVmQNAx4bCQ4tmuPvAN1BrOPwgzgkrHbn2R0Atg3boT4H9UDFdruhbMzf/sOhXcoBhX+OCGKZbezUFGRLDskChPlvY2jWwe4XbkGKt/zbMZh/hCTV1UBMzMz3nCmqJUjTCpIr1kUaM4Z5BIiyMygJ0rTggPuUnTyPw/56d2V+Rk9aQPQrIm5PJN6Zp5LFNRy3acTBZaApWaCJleUkl30gfOt68uQ7mTxrHw8IDnioMqhmcSXHrd8BiGZmoiOmI+duluefdQ9NGoI0LThALRQd849BDBuwAmdH8hyS1cq9LnASv52FpxqO2zTXCwImIeeedy8aXU+Q+h3sl4DEMoQiMJPNNfdoCNK0Uy2iwOkW3OT5iiR1o4YgTXMdjDQSxhtVdkoW0hCkac9hRQiP2qnsnd5XkCSiooJKxl6QJikZT/zhwK7ZCyKZhIfNFH3POK/2gp5Y7wUpor25hsMHzMmyDyE/9LsAAAAASUVORK5CYII=" alt="M04" />
+        <div class="chip-id">M04</div>
+      </div>
+      <div class="card">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6AQAAAACgl2eQAAABfElEQVR4nO1ZQWrDMBAcyYIeFfAD+hT7Z6U/s39kHQMyU3YltyUHU0Mpq0Z72EjOEIaxdrRSHHEaqz//HuiAEl2HX9QhuRozgJJqhC71NakHaqimfBf9Jn2w/fgXTuOpAK6sv5jh3phR1ulsjKRxQHiYE2nMf8zB/z9AeqF9krYBpNZ0vB81HUkuxkg2UN27q5M0sgzX8jEYIelbAARZfzji7rjeBtAYSd8IIAW4WRMG6gauz7DeDJG0D0BtJQFwEXfU6cQMLtJoLhZI+hYAqA14FDlVyU0a9eNZV/JiP0kkd7ijtOfTQkuv27cCGFiP3HqyEYtU73TdJ6/7ZI2t7jhcJGmdd5+86pMSem8hIhbbLFMrhWMeEKS6sw4dsMs0gOv8aZsWSPrm7oKSnLtlx5kjWR3TDsmWADEDk5jlJBW/vmaLJJu4VUtj5vcUsg2Svr27oFz7yVlS74IuK7mXf23KafsraYkbet1N3QXlsiYpI002SPoO0HgSHT4A1PO+F58lHjUAAAAASUVORK5CYII=" alt="M05" />
+        <div class="chip-id">M05</div>
+      </div>
+      <div class="card">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6AQAAAACgl2eQAAABeElEQVR4nO1YQY6DMAwcJ7mnUh+wT4Gnw4/IPcgrO4FFe0AbqVKdbebgUjqqRsaOBxPjFqu7/x0YhIKRhxfmIVHFjJ2wPoDjRhipbku1ZwWQJHWCSW9sf/6HW3wUgUr9RWaaNZ1Sp7MxkV0RduLl3Rr+BSEFYNreq6FzAjNn6e6M2tORuVanHZHGCUF7GgXpyeVyLR/eiEjXA4F+OXMCvJTngeHMW/xkgE5sbWxeYq4npjhLG4/b9UAA8yZ+8ieIs5w4gxcxmosFka4HAmrqNs9lztScnmPHgkjXC2EnHds6rGnWAS4tXvyQFZFddDfq6ag9LTV5KdFRk23dXVHyJ9UpQft8ZLKtJi97izK7o46dUZONztwXA0nAHlgMEK8zge0cQa67XVAK58Q5t0J2RPZEiDqxdeLI681XtijSKiFcv6QHGOmZjxCyDZGuz11QPAKNt8V2Z67Qc5KXsjM/N5V2HrdxQhDHgwNyJVYSqMGGSDcIig/Jwzd4ItKTGGYtKgAAAABJRU5ErkJggg==" alt="M06" />
+        <div class="chip-id">M06</div>
+      </div>
+      <div class="card">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6AQAAAACgl2eQAAABfElEQVR4nO1ZS4rDMAx9sg2zTKAHmKMkR4+PMjeol4EEDZLszC5MwkDtjt9CTdxHEao+zzYxThHd+fdAJxh6HP4wDokyZuxENAJlIfRQXwu1ZwWQPhjTVwAmXXj++hdO8a8IZPk3rJSXJU/nypxsiuAZGLbX+vAWhBSKeZ0PzRKCWraXn+oeZCXV4qRrJZL70R0fbI/RPnwlTroWCCHnn2EljqMvKVqNk64RQgqgWY1M8VknjjTLOFbkZBs5uUot78SRZHZLOKdlJUYKWx1OuhYIYH5q/FQAqR73RZTL61KDk64FAmx7Mx2bGnn6MT2Sl0K9E+IoW+7P0iJ7n7ybkxla58MGXsRonffqvtInkWHlrLN76NV9R5l722lnfZ4COM5URGUNzdw1dxaU9EBoE1HJrBqzJicbUkFT6Zc2u7sKunGCkZFGMNJjK6Yr88tJy8zbUdjFyD1EHYXjWiHsdmtjw2Y59OTUbx/unwWxJSYD2dTzd5+iEwzvEYdvmOjL3CHBsOcAAAAASUVORK5CYII=" alt="M07" />
+        <div class="chip-id">M07</div>
+      </div>
+      <div class="card">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6AQAAAACgl2eQAAABd0lEQVR4nO1ZS26EMAx9huzDDXoUuNmoN4OjcAOyHCnIlZ0MMyuGoKoNrd8qBAtZT89fiLGLqdl/D5hBgvHwjTwEyhj01AGPC2dUl1HdsiKfZgf0erEc/sIu/pUBJf35O9HgI5JOh8qcrNzAvT6EDjx1y0/70Pw9Ax9/34eLa5LzU8sEuAh4uQm1ONlcxWBNlRoIUmwkuCe96GpysnoDl/WnCJA82W4SrcXJ5goGYF5azinS51YIPUfwKE3RWIOTzVUMVtKY5jE44W+llDFv1k+WahIZ2o+PXrvyLFHTZGmenIZnAQdIQ/zgFxoz2OZul/SnQw3dZglxHx9zjxF1PLqf0DiXspMqjkX36V0QJKal7Hx2+WSaPLkLWknlqCTmXYZFd9G0SEArM2J0usZQThlB5kZj8uQuCNMHC7HCrmnyNJOQVkiV6Lcm0zRZxAPnVjxKdrwTj6JJ2/QWa3Kll02vHvrZxbzzNU0mvOWB7C+twgSTUAMPX0MRrADky1pLAAAAAElFTkSuQmCC" alt="M08" />
+        <div class="chip-id">M08</div>
+      </div>
+  </div>
+</body>
+</html>
