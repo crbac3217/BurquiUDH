@@ -14,5 +14,5 @@
 // 그대로 뚫리지 않습니다. (반면 API 키/credential은 그 자체로 시트 전체에
 // 접근 가능하므로 절대 클라이언트 코드에 넣으면 안 됩니다.)
 const CONFIG = {
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxdx-0TjomwXeqhV4WR2B730KvBrt923sqD-8jCnPVIFWlLFLQkgWEjrBssTe7oABeN1A/exec", // 예: "https://script.google.com/macros/s/XXXXXXXX/exec"
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyDuVRYKT7_cIv9xAfDpfAzAbORJQlRvpYwwmNAlWKhZzGbS1dwmJMd2J5bkOYeuk2krg/exec"
 };

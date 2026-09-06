@@ -198,24 +198,30 @@ function viewDashboard(user) {
   document.getElementById("logout-btn").addEventListener("click", logout);
 }
 
-function viewEvents() {
-  const items = EVENTS.map(
-    (ev) => `
+async function viewEvents() {
+  $app.innerHTML = `
+    <section class="card">
+      <header class="topbar">
+        <h1>📋 종목 목록</h1>
+        <a class="ghost" href="#/dashboard">← 뒤로</a>
+      </header>
+      <p class="loading">불러오는 중...</p>
+    </section>
+  `;
+  const events = await API.getEvents();
+
+  const items = events
+    .map(
+      (ev) => `
       <li class="event-item">
-        <span class="event-icon">${ev.icon}</span>
+        <span class="event-icon">${escapeHtml(ev.icon)}</span>
         <div>
           <p class="event-name">${escapeHtml(ev.name)}</p>
           <p class="event-desc">${escapeHtml(ev.desc)}</p>
-          ${
-            ev.missions
-              ? `<ul class="sub-missions">${ev.missions
-                  .map((m) => `<li>${escapeHtml(m)}</li>`)
-                  .join("")}</ul>`
-              : ""
-          }
         </div>
       </li>`
-  ).join("");
+    )
+    .join("");
 
   $app.innerHTML = `
     <section class="card">
@@ -378,7 +384,7 @@ async function viewMission(user) {
           return `
         <li class="mission-owned-item status-${meta.cls}">
           <span class="mission-owned-icon">${meta.icon}</span>
-          <span class="mission-owned-text">${escapeHtml(m.mission)}</span>
+          <span class="mission-owned-text">${escapeHtml(m.mission)}<br/><span class="mission-owned-points">${m.points}점${m.status === "성공" ? " · 내 점수에 반영됨" : ""}</span></span>
           <span class="mission-owned-status">${escapeHtml(m.status)}</span>
         </li>`;
         })
@@ -519,7 +525,8 @@ async function handleScannedCode(user, chipId) {
       </header>
       <div class="mission-box">
         <p class="mission-text">${escapeHtml(result.mission)}</p>
-        <p class="sub">지금부터 미션을 수행해주세요. 진행자가 확인하면 "성공/실패"로 바뀌어요.</p>
+        <p class="mission-points-badge">성공 시 ${result.points}점</p>
+        <p class="sub">지금부터 미션을 수행해주세요. 진행자가 확인해서 "성공"으로 바꾸면 이 점수가 내 점수판에 자동으로 들어가요.</p>
       </div>
       <button id="ok-btn" class="wide-btn">내 히든미션으로</button>
     </section>

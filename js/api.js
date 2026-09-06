@@ -24,15 +24,50 @@ function writeMockClaims(claims) {
 
 const MISSION_STATUS_IN_PROGRESS = "진행중";
 
+// Apps Script가 액션을 못 알아들으면 respond({ error: "unknown action" })을 200 OK로
+// 돌려줍니다(HTTP 상태만으로는 실패인지 알 수 없음) — 배포된 코드가 구버전이라 이 액션이
+// 아직 없을 때 나오는 신호라, 이 모양이면 일부러 throw해서 mock 폴백을 타게 만듭니다.
+// {success:false, ...}처럼 정상적으로 실행됐지만 결과가 실패인 응답과는 구분해야 하므로,
+// success 키가 없는 error 응답일 때만 "지원 안 하는 액션"으로 취급합니다.
+function isUnsupportedActionResponse(data) {
+  return (
+    data &&
+    typeof data === "object" &&
+    !Array.isArray(data) &&
+    "error" in data &&
+    !("success" in data)
+  );
+}
+
+async function fetchApps(url, options) {
+  const res = await fetch(url, options);
+  if (!res.ok) throw new Error("bad response");
+  const data = await res.json();
+  if (isUnsupportedActionResponse(data)) {
+    throw new Error(`backend action not supported: ${data.error}`);
+  }
+  return data;
+}
+
 const API = {
+  // 종목 목록 [{ name, icon, desc }, ...] — 실제로는 DB 시트 1~3행에서 가져옵니다.
+  async getEvents() {
+    if (CONFIG.APPS_SCRIPT_URL) {
+      try {
+        return await fetchApps(`${CONFIG.APPS_SCRIPT_URL}?action=getEvents`);
+      } catch (err) {
+        console.warn("[API] getEvents 실패, mock 데이터 사용:", err);
+      }
+    }
+    return MOCK_EVENTS;
+  },
+
   async getAllowedNames() {
     if (CONFIG.APPS_SCRIPT_URL) {
       try {
-        const res = await fetch(
+        return await fetchApps(
           `${CONFIG.APPS_SCRIPT_URL}?action=getAllowedNames`
         );
-        if (!res.ok) throw new Error("bad response");
-        return await res.json();
       } catch (err) {
         console.warn("[API] getAllowedNames 실패, mock 데이터 사용:", err);
       }
@@ -44,13 +79,11 @@ const API = {
   async hasPin(name) {
     if (CONFIG.APPS_SCRIPT_URL) {
       try {
-        const res = await fetch(
+        return await fetchApps(
           `${CONFIG.APPS_SCRIPT_URL}?action=hasPin&name=${encodeURIComponent(
             name
           )}`
         );
-        if (!res.ok) throw new Error("bad response");
-        return await res.json();
       } catch (err) {
         console.warn("[API] hasPin 실패, mock 데이터 사용:", err);
       }
@@ -62,16 +95,13 @@ const API = {
   async setPin(name, pin) {
     if (CONFIG.APPS_SCRIPT_URL) {
       try {
-        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        return await fetchApps(CONFIG.APPS_SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: "setPin", name, pin }),
         });
-        if (!res.ok) throw new Error("bad response");
-        return await res.json();
       } catch (err) {
-        console.warn("[API] setPin 실패:", err);
-        return { success: false };
+        console.warn("[API] setPin 실패, mock으로 폴백:", err);
       }
     }
     if (localStorage.getItem(`mock_pin_${name}`) !== null) {
@@ -84,16 +114,13 @@ const API = {
   async login(name, pin) {
     if (CONFIG.APPS_SCRIPT_URL) {
       try {
-        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        return await fetchApps(CONFIG.APPS_SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: "login", name, pin }),
         });
-        if (!res.ok) throw new Error("bad response");
-        return await res.json();
       } catch (err) {
-        console.warn("[API] login 실패:", err);
-        return { success: false };
+        console.warn("[API] login 실패, mock으로 폴백:", err);
       }
     }
     const stored = localStorage.getItem(`mock_pin_${name}`);
@@ -107,13 +134,11 @@ const API = {
   async getMyScoreLog(name) {
     if (CONFIG.APPS_SCRIPT_URL) {
       try {
-        const res = await fetch(
+        return await fetchApps(
           `${CONFIG.APPS_SCRIPT_URL}?action=getMyScoreLog&name=${encodeURIComponent(
             name
           )}`
         );
-        if (!res.ok) throw new Error("bad response");
-        return await res.json();
       } catch (err) {
         console.warn("[API] getMyScoreLog 실패, mock 데이터 사용:", err);
       }
@@ -127,11 +152,9 @@ const API = {
   async getTeamScoreLog() {
     if (CONFIG.APPS_SCRIPT_URL) {
       try {
-        const res = await fetch(
+        return await fetchApps(
           `${CONFIG.APPS_SCRIPT_URL}?action=getTeamScoreLog`
         );
-        if (!res.ok) throw new Error("bad response");
-        return await res.json();
       } catch (err) {
         console.warn("[API] getTeamScoreLog 실패, mock 데이터 사용:", err);
       }
@@ -143,13 +166,11 @@ const API = {
   async getMyMissions(name) {
     if (CONFIG.APPS_SCRIPT_URL) {
       try {
-        const res = await fetch(
+        return await fetchApps(
           `${CONFIG.APPS_SCRIPT_URL}?action=getMyMissions&name=${encodeURIComponent(
             name
           )}`
         );
-        if (!res.ok) throw new Error("bad response");
-        return await res.json();
       } catch (err) {
         console.warn("[API] getMyMissions 실패, mock 데이터 사용:", err);
       }
@@ -159,7 +180,8 @@ const API = {
       (chip) => claims[chip.id] && claims[chip.id].name === name
     ).map((chip) => ({
       id: chip.id,
-      mission: chip.mission,
+      mission: resolveMockMissionText(chip.mission, name),
+      points: chip.points,
       status: claims[chip.id].status,
     }));
   },
@@ -170,16 +192,13 @@ const API = {
   async claimMissionChip(name, chipId) {
     if (CONFIG.APPS_SCRIPT_URL) {
       try {
-        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        return await fetchApps(CONFIG.APPS_SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: "claimMissionChip", name, chipId }),
         });
-        if (!res.ok) throw new Error("bad response");
-        return await res.json();
       } catch (err) {
-        console.warn("[API] claimMissionChip 실패:", err);
-        return { success: false, error: "network" };
+        console.warn("[API] claimMissionChip 실패, mock으로 폴백:", err);
       }
     }
     const chip = MOCK_MISSION_CHIPS.find((c) => c.id === chipId);
@@ -196,7 +215,8 @@ const API = {
     }
     return {
       success: true,
-      mission: chip.mission,
+      mission: resolveMockMissionText(chip.mission, name),
+      points: chip.points,
       status: claims[chipId].status,
       alreadyMine,
     };

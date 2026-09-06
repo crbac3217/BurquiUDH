@@ -336,7 +336,18 @@ button:disabled {
 .mission-text {
   font-size: 1.1rem;
   font-weight: 700;
-  margin: 0 0 18px;
+  margin: 0 0 10px;
+}
+
+.mission-points-badge {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(40, 105, 251, 0.12);
+  color: #2869fb;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .hint {
@@ -365,7 +376,7 @@ button:disabled {
 
 .mission-owned-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
   background: rgba(255, 255, 255, 0.55);
@@ -375,8 +386,19 @@ button:disabled {
   font-weight: 600;
 }
 
+.mission-owned-icon {
+  margin-top: 1px;
+}
+
 .mission-owned-text {
   flex: 1;
+  line-height: 1.5;
+}
+
+.mission-owned-points {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2869fb;
 }
 
 .mission-owned-status {
@@ -386,6 +408,7 @@ button:disabled {
   border-radius: 999px;
   background: rgba(35, 31, 32, 0.08);
   flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .mission-owned-item.status-success .mission-owned-status {
