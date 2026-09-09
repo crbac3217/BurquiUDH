@@ -14,5 +14,8 @@
 // 그대로 뚫리지 않습니다. (반면 API 키/credential은 그 자체로 시트 전체에
 // 접근 가능하므로 절대 클라이언트 코드에 넣으면 안 됩니다.)
 const CONFIG = {
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyDuVRYKT7_cIv9xAfDpfAzAbORJQlRvpYwwmNAlWKhZzGbS1dwmJMd2J5bkOYeuk2krg/exec"
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzYfd1OG0q4OyYIY4eNmox_S04QVMcRUHYMctfVT6CkoEehCtVSrvvF9HMCSI4jrwwopQ/exec"
 };
+// 이 이름으로 로그인하면 관리자 패널(종목 설정/결과 선언/미션 판정/개인랭킹 공개)이 열립니다.
+// 서버(Apps Script)도 이 이름을 별도로 확인하니, 둘 다 똑같이 맞춰서 바꿔야 합니다.
+const ADMIN_NAME = "이학균";
