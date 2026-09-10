@@ -3,6 +3,25 @@
 const USER_KEY = "trackfield_user";
 const $app = document.getElementById("app");
 
+// 화면이 비어있는 채로 멈추면 원인을 알 수 없으니, 에러를 화면에 띄웁니다.
+function showFatal(msg) {
+  if ($app) {
+    $app.innerHTML =
+      '<section class="card"><h1>⚠️ 문제가 생겼어요</h1>' +
+      '<p class="sub" style="white-space:pre-wrap;word-break:break-all">' +
+      String(msg).replace(/</g, "&lt;") +
+      "</p><button class=\"wide-btn\" onclick=\"location.reload()\">새로고침</button></section>";
+  }
+}
+window.addEventListener("error", (e) => {
+  console.error("[fatal]", e.error || e.message);
+  showFatal((e.error && e.error.stack) || e.message || "알 수 없는 오류");
+});
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("[fatal-promise]", e.reason);
+  showFatal((e.reason && (e.reason.stack || e.reason.message)) || String(e.reason));
+});
+
 function getUser() {
   return localStorage.getItem(USER_KEY);
 }
@@ -538,6 +557,23 @@ async function viewPersonalRanking(user) {
 
 // ---------- 관리자(이학균) 패널 ----------
 
+// 관리자 쓰기 결과가 실패면 알림. (예전엔 조용히 실패해서 "왜 안되지" 하게 됐음)
+function flashAdminError(res) {
+  if (res && res.success === false) {
+    const msg = {
+      not_admin:
+        "관리자 권한이 없어요.\n이학균으로 로그인했는지, Firebase 콘솔 config/admin.uid가 비어있는지(→ 다시 로그인하면 자동 등록) 확인하세요.",
+      write_failed:
+        "쓰기에 실패했어요.\nFirestore 보안 규칙을 최신 firestore.rules로 다시 게시했는지 확인하세요.",
+      id_exists: "이미 있는 ID예요.",
+      no_id: "ID를 입력하세요.",
+    };
+    alert(msg[res.error] || `실패: ${res.error || "알 수 없음"}`);
+    return true;
+  }
+  return false;
+}
+
 // 개인점수/개인상은 하나씩 등록할 때마다 서버로 보내면(+전체 새로고침) 느리니까,
 // 여기 큐에 모아뒀다가 한 번에 전송합니다. 관리자 패널을 떠나면(페이지 새로고침 등) 비워집니다.
 let adminPendingScores = [];
@@ -805,7 +841,7 @@ function renderAdmin(user, events, settings, names, missions, feedback) {
   document.querySelectorAll(".admin-mission-row .mini-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const chip = missions[Number(btn.dataset.idx)];
-      await API.setMissionStatus(user, chip.id, btn.dataset.status);
+      if (flashAdminError(await API.setMissionStatus(user, chip.id, btn.dataset.status))) return;
       const freshMissions = await API.getMissionsByEvent(settings.currentEvent);
       renderAdmin(user, events, settings, names, freshMissions);
     });
@@ -981,12 +1017,12 @@ function renderAdminMissions(user, chips, eventNames, query) {
       };
       _adminMissionEditing = null;
       renderAdminMissions(user, chips, eventNames, query);
-      await API.updateMissionChip(user, chipId, patch);
+      flashAdminError(await API.updateMissionChip(user, chipId, patch));
     });
     form.querySelector(".chip-delete").addEventListener("click", async () => {
       if (!confirm(`${chipId} 삭제할까요?`)) return;
       _adminMissionEditing = null;
-      await API.deleteMissionChip(user, chipId);
+      flashAdminError(await API.deleteMissionChip(user, chipId));
     });
   });
 
@@ -998,10 +1034,7 @@ function renderAdminMissions(user, chips, eventNames, query) {
       points: addForm.points.value,
       event: addForm.event.value,
     });
-    if (res && res.error === "id_exists") {
-      alert("이미 있는 ID예요.");
-      return;
-    }
+    if (flashAdminError(res)) return;
     addForm.reset();
   });
 }
@@ -1100,12 +1133,12 @@ function renderAdminScores(user, personal, team) {
       const patch = { note: form.note.value, points: form.points.value };
       _adminScoreEditing = null;
       renderAdminScores(user, personal, team);
-      await API.updateScoreEntry(user, kind, id, patch);
+      flashAdminError(await API.updateScoreEntry(user, kind, id, patch));
     });
     form.querySelector(".score-delete").addEventListener("click", async () => {
       if (!confirm("이 점수 기록을 삭제할까요?")) return;
       _adminScoreEditing = null;
-      await API.deleteScoreEntry(user, kind, id);
+      flashAdminError(await API.deleteScoreEntry(user, kind, id));
     });
   });
 }

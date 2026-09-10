@@ -17,16 +17,23 @@
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // 캐시된 옛날 js 파일이 계속 뜨는 문제를 막기 위해, 매번 새 쿼리스트링을 붙여서
-    // 우리 스크립트를 불러옵니다 — 브라우저가 매번 "새로운 URL"로 인식해서 캐시를 안 씁니다.
-    // (그래서 아래 새로고침 버튼을 누르면 사실상 Ctrl+Shift+R과 같은 효과가 납니다)
-    var __v = Date.now();
-    document.write(
-      '<script src="js/vendor/jsQR.min.js?v=' + __v + '"><\/script>' +
-      '<script src="js/config.js?v=' + __v + '"><\/script>' +
-      '<script src="js/api.js?v=' + __v + '"><\/script>' +
-      '<script src="js/app.js?v=' + __v + '"><\/script>'
-    );
+    if (typeof firebase === "undefined" || !firebase.firestore) {
+      document.getElementById("app").innerHTML =
+        '<section class="card"><h1>⚠️ Firebase 로드 실패</h1>' +
+        '<p class="sub">www.gstatic.com 접속이 막혀있을 수 있어요 (방화벽 / 보안 프로그램 / 회사·학교 네트워크 / 확장 프로그램). ' +
+        '다른 네트워크나 브라우저, 시크릿 창에서 시도해보세요.</p>' +
+        '<button class="wide-btn" onclick="location.reload()">새로고침</button></section>';
+    } else {
+      // 캐시된 옛날 js가 계속 뜨는 걸 막기 위해 매번 새 쿼리스트링을 붙여 로드.
+      // (그래서 아래 🔄 버튼 = 사실상 Ctrl+Shift+R)
+      var __v = Date.now();
+      document.write(
+        '<script src="js/vendor/jsQR.min.js?v=' + __v + '"><\/script>' +
+        '<script src="js/config.js?v=' + __v + '"><\/script>' +
+        '<script src="js/api.js?v=' + __v + '"><\/script>' +
+        '<script src="js/app.js?v=' + __v + '"><\/script>'
+      );
+    }
   </script>
   <script>
     document.getElementById("hard-refresh-btn").addEventListener("click", function () {
