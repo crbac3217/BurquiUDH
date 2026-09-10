@@ -1,0 +1,89 @@
+rules_version = '2';
+
+// Firebase 콘솔 > Firestore Database > 규칙(Rules) 탭에 이 내용을 통째로 붙여넣고 "게시".
+//
+// 모델: 모든 접근은 익명 로그인(request.auth != null)을 요구.
+// 관리자: config/admin.uid 에 등록된 UID 하나만. ADMIN_NAME으로 로그인/PIN설정에
+//         처음 성공한 사람의 익명 UID가 앱에 의해 자동 등록됨(비어있을 때 1회).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/config/admin)
+        && get(/databases/$(database)/documents/config/admin).data.uid == request.auth.uid;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // ---- config/admin : 비어있을 때 처음 로그인한 관리자가 자기 UID를 등록(1회) ----
+    match /config/admin {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update: if signedIn()
+        && (resource.data.uid == "" || resource.data.uid == request.auth.uid);
+      allow delete: if false;
+    }
+
+    // ---- config/settings : 읽기는 누구나, 쓰기는 관리자만 ----
+    match /config/settings {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- 마스터 데이터(종목/참가자) : 읽기 누구나, 쓰기 관리자만(앱에선 안 씀, 콘솔로 관리) ----
+    match /events/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+    match /participants/{name} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- 로그인(PIN) : 읽기는 누구나(검증용), pinHash가 아직 없을 때만 1회 설정 가능 ----
+    match /logins/{name} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(["name", "pinHash", "salt"]);
+      allow update: if signedIn()
+        && !("pinHash" in resource.data)
+        && changedKeys().hasOnly(["name", "pinHash", "salt"]);
+      allow delete: if false;
+    }
+
+    // ---- 점수 로그 : 읽기 누구나, 추가는 관리자만, 수정/삭제 불가(누적 로그) ----
+    match /personalScores/{id} {
+      allow read: if signedIn();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+    match /teamScores/{id} {
+      allow read: if signedIn();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ---- 히든미션 칩 ----
+    //  읽기: 누구나
+    //  쓰기: 관리자(주로 status 판정) 또는, 아직 아무도 안 가져간 칩을 "클레임"하는 참가자
+    //       (claimedBy/claimedAt/status만 바꿀 수 있음)
+    match /missionChips/{id} {
+      allow read: if signedIn();
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && resource.data.claimedBy == null
+          && changedKeys().hasOnly(["claimedBy", "claimedAt", "status"])
+        );
+      allow create, delete: if isAdmin();
+    }
+  }
+}

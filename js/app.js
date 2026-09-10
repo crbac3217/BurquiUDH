@@ -1031,3 +1031,11 @@ async function render() {
 
 window.addEventListener("hashchange", render);
 window.addEventListener("DOMContentLoaded", render);
+
+// 설정(진행 종목 / 대회 시작 / 랭킹 공개)이 실시간으로 바뀌면 대시보드를 다시 그립니다.
+// → 관리자가 "대회 시작"을 켜는 순간 모두의 대시보드가 잠금 해제됩니다.
+window.addEventListener("settingschange", () => {
+  if (location.hash === "#/dashboard" || location.hash === "" || location.hash === "#/") {
+    render();
+  }
+});
