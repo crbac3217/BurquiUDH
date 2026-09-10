@@ -405,6 +405,9 @@ async function viewSupplies(user) {
   `;
 }
 
+// 종목 이름/설명은 기본적으로 모자이크(블러). 탭하면 그 항목만, 위 버튼으로 전체 공개.
+let _eventsRevealed = false;
+
 async function viewEvents() {
   $app.innerHTML = `
     <section class="card">
@@ -417,6 +420,7 @@ async function viewEvents() {
   `;
   const events = await API.getEvents();
 
+  const sp = _eventsRevealed ? "spoiler revealed" : "spoiler";
   const items = events
     .map((ev) => {
       const metaParts = [];
@@ -426,8 +430,8 @@ async function viewEvents() {
       <li class="event-item">
         <span class="event-icon">${escapeHtml(ev.icon)}</span>
         <div>
-          <p class="event-name">${escapeHtml(ev.name)}</p>
-          <p class="event-desc">${escapeHtml(ev.desc)}</p>
+          <p class="event-name ${sp}">${escapeHtml(ev.name)}</p>
+          <p class="event-desc ${sp}">${escapeHtml(ev.desc)}</p>
           ${metaParts.length ? `<p class="event-meta">${metaParts.join(" · ")}</p>` : ""}
         </div>
       </li>`;
@@ -440,9 +444,21 @@ async function viewEvents() {
         <h1>📋 종목 목록</h1>
         <a class="ghost" href="#/dashboard">← 뒤로</a>
       </header>
+      <button type="button" id="events-reveal-btn" class="wide-btn">
+        ${_eventsRevealed ? "🙈 다시 가리기" : "👀 전부 보기"}
+      </button>
+      <p class="hint">가려진 글자를 탭하면 그 종목만 볼 수 있어요.</p>
       <ul class="event-list">${items}</ul>
     </section>
   `;
+
+  document.getElementById("events-reveal-btn").addEventListener("click", () => {
+    _eventsRevealed = !_eventsRevealed;
+    viewEvents();
+  });
+  $app.querySelectorAll(".event-list .spoiler").forEach((el) => {
+    el.addEventListener("click", () => el.classList.toggle("revealed"));
+  });
 }
 
 function aggregateScoreLog(log, keyField) {
