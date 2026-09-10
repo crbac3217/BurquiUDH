@@ -327,23 +327,16 @@ button:disabled {
   color: #555;
 }
 
-/* 모자이크(스포일러): 탭하면 selective 하게 공개 */
+/* 모자이크(스포일러): 진행자가 종목을 시작하면 블러가 풀림 */
 .spoiler {
   filter: blur(5px);
-  cursor: pointer;
   user-select: none;
   border-radius: 4px;
-  transition: filter 0.15s ease;
+  transition: filter 0.2s ease;
 }
 
 .event-desc.spoiler {
   filter: blur(4px);
-}
-
-.spoiler.revealed {
-  filter: none;
-  user-select: auto;
-  cursor: auto;
 }
 
 .event-meta {

@@ -6,6 +6,7 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
 const deleteField = firebase.firestore.FieldValue.delete;
+const arrayUnion = firebase.firestore.FieldValue.arrayUnion;
 
 // 익명 로그인 — 보안 규칙이 request.auth를 요구하므로, 모든 요청 전에 이게 끝나야 합니다.
 const authReady = auth
@@ -69,19 +70,26 @@ function resolveMissionText(template, participant, asHtml) {
 }
 
 // ---------- 설정 (실시간) ----------
-let _settings = { currentEvent: null, personalRankingVisible: false, eventStarted: false };
+let _settings = {
+  currentEvent: null,
+  personalRankingVisible: false,
+  eventStarted: false,
+  revealedEvents: [],
+};
 let _settingsLoaded = false;
 function applySettingsSnap(d) {
   const next = {
     currentEvent: (d && d.currentEvent) || null,
     personalRankingVisible: !!(d && d.personalRankingVisible),
     eventStarted: !!(d && d.eventStarted),
+    revealedEvents: (d && Array.isArray(d.revealedEvents) ? d.revealedEvents : []).slice(),
   };
   const changed =
     !_settingsLoaded ||
     next.currentEvent !== _settings.currentEvent ||
     next.personalRankingVisible !== _settings.personalRankingVisible ||
-    next.eventStarted !== _settings.eventStarted;
+    next.eventStarted !== _settings.eventStarted ||
+    next.revealedEvents.join("|") !== (_settings.revealedEvents || []).join("|");
   _settings = next;
   _settingsLoaded = true;
   if (changed) {
@@ -351,9 +359,18 @@ const API = {
 
   // ---------- 관리자 전용 ----------
 
+  // 진행 종목 설정 = 그 종목의 블러를 풀어줌(revealedEvents에 누적).
+  // 빈 값으로 해제 = "초기화" → 진행 종목 없애고 블러 전부 다시 걸기.
   async setCurrentEvent(_adminName, eventName) {
     return adminWrite(() =>
-      db.doc("config/settings").set({ currentEvent: eventName }, { merge: true })
+      eventName
+        ? db.doc("config/settings").set(
+            { currentEvent: eventName, revealedEvents: arrayUnion(eventName) },
+            { merge: true }
+          )
+        : db
+            .doc("config/settings")
+            .set({ currentEvent: null, revealedEvents: [] }, { merge: true })
     );
   },
 

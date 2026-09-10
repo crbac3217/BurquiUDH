@@ -405,10 +405,9 @@ async function viewSupplies(user) {
   `;
 }
 
-// 종목 이름/설명은 기본적으로 모자이크(블러). 탭하면 그 항목만, 위 버튼으로 전체 공개.
-let _eventsRevealed = false;
-
-async function viewEvents() {
+// 종목 이름/설명은 기본적으로 모자이크(블러). 관리자가 "진행 종목"으로 지정한 종목만
+// 블러가 풀리고(누적), 진행 종목을 해제(초기화)하면 전부 다시 블러. 관리자는 항상 다 봄.
+async function viewEvents(user) {
   $app.innerHTML = `
     <section class="card">
       <header class="topbar">
@@ -418,20 +417,23 @@ async function viewEvents() {
       <p class="loading">불러오는 중...</p>
     </section>
   `;
-  const events = await API.getEvents();
+  const [events, settings] = await Promise.all([API.getEvents(), API.getSettings()]);
+  const isAdmin = user === ADMIN_NAME;
+  const revealed = new Set(settings.revealedEvents || []);
+  const anyBlurred = !isAdmin && events.some((ev) => !revealed.has(ev.name));
 
-  const sp = _eventsRevealed ? "spoiler revealed" : "spoiler";
   const items = events
     .map((ev) => {
       const metaParts = [];
       if (ev.capacity) metaParts.push(`인원 ${escapeHtml(String(ev.capacity))}`);
       if (ev.points) metaParts.push(`${ev.points}점`);
+      const sp = isAdmin || revealed.has(ev.name) ? "" : " spoiler";
       return `
       <li class="event-item">
         <span class="event-icon">${escapeHtml(ev.icon)}</span>
         <div>
-          <p class="event-name ${sp}">${escapeHtml(ev.name)}</p>
-          <p class="event-desc ${sp}">${escapeHtml(ev.desc)}</p>
+          <p class="event-name${sp}">${escapeHtml(ev.name)}</p>
+          <p class="event-desc${sp}">${escapeHtml(ev.desc)}</p>
           ${metaParts.length ? `<p class="event-meta">${metaParts.join(" · ")}</p>` : ""}
         </div>
       </li>`;
@@ -444,21 +446,14 @@ async function viewEvents() {
         <h1>📋 종목 목록</h1>
         <a class="ghost" href="#/dashboard">← 뒤로</a>
       </header>
-      <button type="button" id="events-reveal-btn" class="wide-btn">
-        ${_eventsRevealed ? "🙈 다시 가리기" : "👀 전부 보기"}
-      </button>
-      <p class="hint">가려진 글자를 탭하면 그 종목만 볼 수 있어요.</p>
+      ${
+        anyBlurred
+          ? `<p class="hint">🔒 아직 안 나온 종목은 가려져 있어요. 진행자가 종목을 시작하면 공개돼요.</p>`
+          : ""
+      }
       <ul class="event-list">${items}</ul>
     </section>
   `;
-
-  document.getElementById("events-reveal-btn").addEventListener("click", () => {
-    _eventsRevealed = !_eventsRevealed;
-    viewEvents();
-  });
-  $app.querySelectorAll(".event-list .spoiler").forEach((el) => {
-    el.addEventListener("click", () => el.classList.toggle("revealed"));
-  });
 }
 
 function aggregateScoreLog(log, keyField) {
@@ -853,7 +848,9 @@ function renderAdmin(user, events, settings, names, missions, feedback, diag) {
     if (flashAdminError(await API.setCurrentEvent(user, eventName || null))) return;
     viewAdmin(
       user,
-      eventName ? `진행 종목을 "${eventName}"(으)로 설정했어요.` : "진행 종목을 해제했어요."
+      eventName
+        ? `진행 종목을 "${eventName}"(으)로 설정했어요. (종목 목록에서 이 종목 블러 해제됨)`
+        : "진행 종목을 해제하고 종목 목록 블러를 전부 다시 걸었어요."
     );
   });
 
@@ -1486,7 +1483,7 @@ async function handleScannedCode(user, chipId) {
 const ROUTES = {
   "#/login": () => viewLogin(),
   "#/dashboard": (user) => viewDashboard(user),
-  "#/events": () => viewEvents(),
+  "#/events": (user) => viewEvents(user),
   "#/team": (user) => viewMyTeam(user),
   "#/scores": () => viewTeamScores(),
   "#/my-score": (user) => viewMyScore(user),
