@@ -53,17 +53,26 @@ function resolveMissionText(template, participant) {
 // ---------- 설정 (실시간) ----------
 let _settings = { currentEvent: null, personalRankingVisible: false, eventStarted: false };
 let _settingsLoaded = false;
-db.doc("config/settings").onSnapshot(
-  (snap) => {
-    const d = snap.exists ? snap.data() : {};
-    _settings = {
-      currentEvent: d.currentEvent || null,
-      personalRankingVisible: !!d.personalRankingVisible,
-      eventStarted: !!d.eventStarted,
-    };
-    _settingsLoaded = true;
+function applySettingsSnap(d) {
+  const next = {
+    currentEvent: (d && d.currentEvent) || null,
+    personalRankingVisible: !!(d && d.personalRankingVisible),
+    eventStarted: !!(d && d.eventStarted),
+  };
+  const changed =
+    !_settingsLoaded ||
+    next.currentEvent !== _settings.currentEvent ||
+    next.personalRankingVisible !== _settings.personalRankingVisible ||
+    next.eventStarted !== _settings.eventStarted;
+  _settings = next;
+  _settingsLoaded = true;
+  if (changed) {
     window.dispatchEvent(new CustomEvent("settingschange", { detail: _settings }));
-  },
+  }
+}
+
+db.doc("config/settings").onSnapshot(
+  (snap) => applySettingsSnap(snap.exists ? snap.data() : {}),
   (err) => console.warn("[api] settings 구독 실패:", err)
 );
 
@@ -122,6 +131,19 @@ const API = {
         window.addEventListener("settingschange", h);
         setTimeout(h, 4000);
       });
+    }
+    return { ..._settings };
+  },
+
+  // 탭이 백그라운드였다가 돌아왔을 때처럼, 실시간 리스너가 아직 못 따라잡았을 수 있을 때
+  // 설정을 강제로 한 번 직접 읽어와서 갱신합니다.
+  async refreshSettings() {
+    await authReady;
+    try {
+      const snap = await db.doc("config/settings").get();
+      applySettingsSnap(snap.exists ? snap.data() : {});
+    } catch (err) {
+      console.warn("[api] refreshSettings 실패:", err);
     }
     return { ..._settings };
   },

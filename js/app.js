@@ -1393,10 +1393,20 @@ async function render() {
 window.addEventListener("hashchange", render);
 window.addEventListener("DOMContentLoaded", render);
 
-// 설정(진행 종목 / 대회 시작 / 랭킹 공개)이 실시간으로 바뀌면 대시보드를 다시 그립니다.
-// → 관리자가 "대회 시작"을 켜는 순간 모두의 대시보드가 잠금 해제됩니다.
-window.addEventListener("settingschange", () => {
-  if (location.hash === "#/dashboard" || location.hash === "" || location.hash === "#/") {
-    render();
-  }
+// 지금 화면을 조용히 다시 그립니다. (카메라 스캔 중이면 건드리지 않음)
+function autoRerender() {
+  if (location.hash === "#/scan") return;
+  render();
+}
+
+// 설정(진행 종목 / 대회 시작 / 랭킹 공개)이 실시간으로 바뀌면 즉시 화면을 갱신합니다.
+// → 관리자가 "대회 시작"을 켜는 순간 모두의 대시보드가 자동으로 잠금 해제됩니다.
+window.addEventListener("settingschange", autoRerender);
+
+// 탭이 백그라운드였다가 다시 보이거나 창에 포커스가 오면, 실시간 리스너가 못 따라잡았을 수
+// 있으니 설정을 강제로 다시 읽어옵니다. 값이 실제로 바뀌었으면 settingschange가 떠서
+// 위 autoRerender가 실행됩니다. (안 바뀌었으면 화면 안 건드림 → Ctrl+F5 불필요)
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") API.refreshSettings();
 });
+window.addEventListener("focus", () => API.refreshSettings());
