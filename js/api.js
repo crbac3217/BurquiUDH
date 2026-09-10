@@ -425,6 +425,55 @@ const API = {
     return adminWrite(() => db.doc(`missionChips/${chipId}`).delete());
   },
 
+  // 점수 로그 관리용 — 팀/개인 점수 로그를 최신순으로 실시간 구독. unsubscribe 반환.
+  onScoreLog(callback) {
+    let personal = [];
+    let team = [];
+    let u1 = () => {};
+    let u2 = () => {};
+    const emit = () => callback({ personal, team });
+    authReady.then(() => {
+      u1 = db
+        .collection("personalScores")
+        .orderBy("ts", "desc")
+        .onSnapshot(
+          (snap) => {
+            personal = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            emit();
+          },
+          (err) => console.warn("[api] personalScores 구독 실패:", err)
+        );
+      u2 = db
+        .collection("teamScores")
+        .orderBy("ts", "desc")
+        .onSnapshot(
+          (snap) => {
+            team = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            emit();
+          },
+          (err) => console.warn("[api] teamScores 구독 실패:", err)
+        );
+    });
+    return () => {
+      u1();
+      u2();
+    };
+  },
+
+  // kind: "personal" | "team", patch: { note?, points? } 중 바꿀 것만
+  async updateScoreEntry(_adminName, kind, id, patch) {
+    const col = kind === "team" ? "teamScores" : "personalScores";
+    const clean = {};
+    if (patch.note !== undefined) clean.note = String(patch.note);
+    if (patch.points !== undefined) clean.points = Number(patch.points);
+    return adminWrite(() => db.doc(`${col}/${id}`).update(clean));
+  },
+
+  async deleteScoreEntry(_adminName, kind, id) {
+    const col = kind === "team" ? "teamScores" : "personalScores";
+    return adminWrite(() => db.doc(`${col}/${id}`).delete());
+  },
+
   async getPersonalRanking(name) {
     await authReady;
     const settings = await this.getSettings();

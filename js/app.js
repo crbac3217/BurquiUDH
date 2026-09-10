@@ -697,6 +697,10 @@ function renderAdmin(user, events, settings, names, missions, feedback) {
 
       <div class="admin-section">
         <p class="admin-section-title">데이터 관리</p>
+        <a class="menu-item" href="#/admin/scores">
+          <span class="menu-icon">🧾</span>
+          <span>점수 로그 관리 (수정·삭제)</span>
+        </a>
         <a class="menu-item" href="#/admin/missions">
           <span class="menu-icon">🎯</span>
           <span>미션칩 전체 관리 (실시간)</span>
@@ -1002,6 +1006,110 @@ function renderAdminMissions(user, chips, eventNames, query) {
   });
 }
 
+// ---------- 관리자: 점수 로그 관리 (수정·삭제, 실시간) ----------
+
+let _adminScoreEditing = null; // "personal:<id>" 또는 "team:<id>"
+
+async function viewAdminScores(user) {
+  if (user !== ADMIN_NAME) {
+    navigate("#/dashboard");
+    return;
+  }
+  $app.innerHTML = loadingCard("불러오는 중...");
+  _activeUnsub = API.onScoreLog(({ personal, team }) => {
+    renderAdminScores(user, personal, team);
+  });
+}
+
+function renderAdminScores(user, personal, team) {
+  const row = (kind, e) => {
+    const key = `${kind}:${e.id}`;
+    const who = kind === "team" ? e.team : e.name;
+    if (_adminScoreEditing === key) {
+      return `
+        <li class="admin-mission-row editing" data-key="${key}">
+          <div class="admin-mission-text"><strong>${escapeHtml(who || "")}</strong> · ${escapeHtml(e.event || "")}</div>
+          <form class="admin-stack-form score-edit-form">
+            <input name="note" type="text" value="${escapeHtml(e.note || "")}" placeholder="비고" />
+            <div class="admin-inline-form">
+              <input name="points" type="number" value="${e.points || 0}" />
+              <button type="submit" class="mini-btn active status-성공">저장</button>
+              <button type="button" class="mini-btn score-edit-cancel">취소</button>
+              <button type="button" class="mini-btn status-실패 score-delete">삭제</button>
+            </div>
+          </form>
+        </li>`;
+    }
+    return `
+      <li class="admin-mission-row" data-key="${key}">
+        <div class="admin-mission-text">
+          <span><strong>${escapeHtml(who || "?")}</strong> · ${escapeHtml(e.event || "")} · ${e.points || 0}점</span>
+          <span class="admin-mission-meta">${escapeHtml(e.note || "")}</span>
+        </div>
+        <div class="admin-mission-actions">
+          <button type="button" class="mini-btn score-edit" data-key="${key}">수정</button>
+        </div>
+      </li>`;
+  };
+
+  const section = (title, kind, list) => `
+    <div class="admin-section">
+      <p class="admin-section-title">${title} (${list.length})</p>
+      ${
+        list.length
+          ? `<ul class="admin-mission-list">${list.map((e) => row(kind, e)).join("")}</ul>`
+          : `<p class="empty">아직 없어요.</p>`
+      }
+    </div>`;
+
+  $app.innerHTML = `
+    <section class="card">
+      <header class="topbar">
+        <h1>🧾 점수 로그 관리</h1>
+        <a class="ghost" href="#/admin">← 뒤로</a>
+      </header>
+      <p class="hint">최신순 · 실시간. 잘못 넣은 점수는 여기서 [수정]으로 비고/점수를 고치거나 삭제하세요.</p>
+      ${section("팀 점수", "team", team)}
+      ${section("개인 점수", "personal", personal)}
+    </section>
+  `;
+
+  const findEntry = (key) => {
+    const [kind, id] = key.split(":");
+    const list = kind === "team" ? team : personal;
+    return { kind, id, entry: list.find((x) => x.id === id) };
+  };
+
+  $app.querySelectorAll(".score-edit").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      _adminScoreEditing = btn.dataset.key;
+      renderAdminScores(user, personal, team);
+    });
+  });
+  $app.querySelectorAll(".score-edit-cancel").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      _adminScoreEditing = null;
+      renderAdminScores(user, personal, team);
+    });
+  });
+  $app.querySelectorAll(".score-edit-form").forEach((form) => {
+    const key = form.closest(".admin-mission-row").dataset.key;
+    const { kind, id } = findEntry(key);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const patch = { note: form.note.value, points: form.points.value };
+      _adminScoreEditing = null;
+      renderAdminScores(user, personal, team);
+      await API.updateScoreEntry(user, kind, id, patch);
+    });
+    form.querySelector(".score-delete").addEventListener("click", async () => {
+      if (!confirm("이 점수 기록을 삭제할까요?")) return;
+      _adminScoreEditing = null;
+      await API.deleteScoreEntry(user, kind, id);
+    });
+  });
+}
+
 async function viewMission(user) {
   $app.innerHTML = `
     <section class="card">
@@ -1207,6 +1315,7 @@ const ROUTES = {
   "#/scan": (user) => viewScan(user),
   "#/admin": (user) => viewAdmin(user),
   "#/admin/missions": (user) => viewAdminMissions(user),
+  "#/admin/scores": (user) => viewAdminScores(user),
 };
 
 // 대회 시작 전(관리자 제외)에도 볼 수 있는 라우트. 그 외는 직접 주소로 들어가도 막힘.

@@ -59,16 +59,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // ---- 점수 로그 : 읽기 누구나, 추가는 관리자만, 수정/삭제 불가(누적 로그) ----
+    // ---- 점수 로그 : 읽기 누구나, 추가/수정/삭제는 관리자만 ----
+    //   (잘못 넣은 점수를 관리자 패널에서 고칠 수 있게 update/delete 허용)
     match /personalScores/{id} {
       allow read: if signedIn();
-      allow create: if isAdmin();
-      allow update, delete: if false;
+      allow write: if isAdmin();
     }
     match /teamScores/{id} {
       allow read: if signedIn();
-      allow create: if isAdmin();
-      allow update, delete: if false;
+      allow write: if isAdmin();
     }
 
     // ---- 히든미션 칩 ----
