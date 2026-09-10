@@ -448,6 +448,25 @@ const API = {
     return adminWrite(() => db.doc(`missionChips/${chipId}`).delete());
   },
 
+  // 관리자가 미션칩을 사람에게 수동 배정/배정해제 (QR 스캔이 안 될 때 대비).
+  // name이 빈 값이면 배정 해제(claimedBy/claimedAt/status 초기화).
+  async assignMissionChip(_adminName, chipId, name) {
+    return adminWrite(async () => {
+      const ref = db.doc(`missionChips/${chipId}`);
+      if (!name) {
+        await ref.update({ claimedBy: null, claimedAt: null, status: null });
+        return;
+      }
+      const cur = (await ref.get()).data() || {};
+      await ref.update({
+        claimedBy: name,
+        claimedAt:
+          cur.claimedBy === name && cur.claimedAt ? cur.claimedAt : serverTimestamp(),
+        status: cur.claimedBy === name ? cur.status || "진행중" : "진행중",
+      });
+    });
+  },
+
   // 점수 로그 관리용 — 팀/개인 점수 로그를 최신순으로 실시간 구독. unsubscribe 반환.
   onScoreLog(callback) {
     let personal = [];

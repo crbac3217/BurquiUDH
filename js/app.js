@@ -763,9 +763,11 @@ function renderAdmin(user, events, settings, names, missions, feedback) {
   document.getElementById("event-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const eventName = document.getElementById("event-select").value;
-    if (!eventName) return;
-    await API.setCurrentEvent(user, eventName);
-    viewAdmin(user, `진행 종목을 "${eventName}"(으)로 설정했어요.`);
+    if (flashAdminError(await API.setCurrentEvent(user, eventName || null))) return;
+    viewAdmin(
+      user,
+      eventName ? `진행 종목을 "${eventName}"(으)로 설정했어요.` : "진행 종목을 해제했어요."
+    );
   });
 
   document.getElementById("ranking-toggle-btn").addEventListener("click", async () => {
@@ -863,12 +865,12 @@ async function viewAdminMissions(user) {
   }
   $app.innerHTML = loadingCard("불러오는 중...");
 
-  const events = await API.getEvents();
+  const [events, names] = await Promise.all([API.getEvents(), API.getAllowedNames()]);
   const eventNames = events.map((e) => e.name);
   let chips = [];
   let query = "";
 
-  const rerender = () => renderAdminMissions(user, chips, eventNames, query);
+  const rerender = () => renderAdminMissions(user, chips, eventNames, names, query);
 
   _activeUnsub = API.onMissionChips((list) => {
     chips = list.sort((a, b) => a.id.localeCompare(b.id));
@@ -882,7 +884,7 @@ async function viewAdminMissions(user) {
   };
 }
 
-function renderAdminMissions(user, chips, eventNames, query) {
+function renderAdminMissions(user, chips, eventNames, names, query) {
   const STATUSES = ["진행중", "성공", "실패"];
   const q = query.trim().toLowerCase();
   const filtered = q
@@ -905,6 +907,15 @@ function renderAdminMissions(user, chips, eventNames, query) {
   const eventOpts = (sel) =>
     `<option value=""${!sel ? " selected" : ""}>(종목 없음)</option>` +
     eventNames
+      .map(
+        (n) =>
+          `<option value="${escapeHtml(n)}"${n === sel ? " selected" : ""}>${escapeHtml(n)}</option>`
+      )
+      .join("");
+
+  const assignOpts = (sel) =>
+    `<option value=""${!sel ? " selected" : ""}>(미배정)</option>` +
+    names
       .map(
         (n) =>
           `<option value="${escapeHtml(n)}"${n === sel ? " selected" : ""}>${escapeHtml(n)}</option>`
@@ -942,7 +953,9 @@ function renderAdminMissions(user, chips, eventNames, query) {
         <div class="admin-mission-text">
           <span><strong>${escapeHtml(c.id)}</strong> · ${c.points || 0}점 · ${escapeHtml(c.event || "종목없음")}</span>
           <span class="admin-mission-meta">${escapeHtml(c.mission || "")}</span>
-          <span class="admin-mission-meta">${c.claimedBy ? "🙋 " + escapeHtml(c.claimedBy) : "아직 아무도 안 가져감"}</span>
+          <span class="admin-mission-meta">배정:
+            <select class="chip-assign" data-id="${escapeHtml(c.id)}">${assignOpts(c.claimedBy || "")}</select>
+          </span>
         </div>
         <div class="admin-mission-actions">
           ${statusBtns}
@@ -991,22 +1004,28 @@ function renderAdminMissions(user, chips, eventNames, query) {
   search.addEventListener("input", () => window._adminMissionsSetQuery(search.value));
 
   $app.querySelectorAll(".mini-btn[data-status]").forEach((btn) => {
-    btn.addEventListener("click", () =>
-      API.setMissionStatus(user, btn.dataset.id, btn.dataset.status)
+    btn.addEventListener("click", async () =>
+      flashAdminError(await API.setMissionStatus(user, btn.dataset.id, btn.dataset.status))
     );
+  });
+
+  $app.querySelectorAll(".chip-assign").forEach((sel) => {
+    sel.addEventListener("change", async () => {
+      flashAdminError(await API.assignMissionChip(user, sel.dataset.id, sel.value || null));
+    });
   });
 
   $app.querySelectorAll(".chip-edit").forEach((btn) => {
     btn.addEventListener("click", () => {
       _adminMissionEditing = btn.dataset.id;
-      renderAdminMissions(user, chips, eventNames, query);
+      renderAdminMissions(user, chips, eventNames, names, query);
     });
   });
 
   $app.querySelectorAll(".chip-edit-cancel").forEach((btn) => {
     btn.addEventListener("click", () => {
       _adminMissionEditing = null;
-      renderAdminMissions(user, chips, eventNames, query);
+      renderAdminMissions(user, chips, eventNames, names, query);
     });
   });
 
@@ -1020,7 +1039,7 @@ function renderAdminMissions(user, chips, eventNames, query) {
         event: form.event.value,
       };
       _adminMissionEditing = null;
-      renderAdminMissions(user, chips, eventNames, query);
+      renderAdminMissions(user, chips, eventNames, names, query);
       flashAdminError(await API.updateMissionChip(user, chipId, patch));
     });
     form.querySelector(".chip-delete").addEventListener("click", async () => {
