@@ -453,6 +453,26 @@ button:disabled {
   margin: 0 0 10px;
 }
 
+/* 미션 문구 안의 파트너/네메시스/티어 강조 */
+.mtok {
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.mtok-partner {
+  color: #0a6b4c;
+  background: rgba(16, 185, 129, 0.16);
+}
+.mtok-nemesis {
+  color: #b3123f;
+  background: rgba(224, 36, 94, 0.14);
+}
+.mtok-tier {
+  color: #7c4a03;
+  background: rgba(224, 164, 21, 0.18);
+}
+
 .mission-points-badge {
   display: inline-block;
   margin: 0 0 14px;
@@ -695,41 +715,6 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.admin-pending-list {
-  list-style: none;
-  margin: 0 0 10px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 30vh;
-  overflow-y: auto;
-}
-
-.admin-pending-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 10px;
-  border: 1px solid rgba(35, 31, 32, 0.08);
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.pending-remove-btn {
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border-radius: 50%;
-  background: rgba(224, 36, 94, 0.12);
-  color: #b0184a;
-  font-size: 0.8rem;
-  flex-shrink: 0;
 }
 
 .admin-mission-list {

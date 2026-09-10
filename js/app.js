@@ -49,6 +49,17 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// 미션 템플릿 원문에서 [파트너]/[네메시스]/[티어] 토큰만 색칠 (치환 전 표시용).
+function missionTokenHtml(str) {
+  return escapeHtml(str || "")
+    .split("[파트너]")
+    .join('<span class="mtok mtok-partner">[파트너]</span>')
+    .split("[네메시스]")
+    .join('<span class="mtok mtok-nemesis">[네메시스]</span>')
+    .split("[티어]")
+    .join('<span class="mtok mtok-tier">[티어]</span>');
+}
+
 // 흑팀/백팀은 이름 그대로 검정/흰색 배지로, 그 외 팀명은 기본(파란색) 배지로.
 function teamBadgeHtml(team) {
   if (!team) return "";
@@ -574,10 +585,6 @@ function flashAdminError(res) {
   return false;
 }
 
-// 개인점수/개인상은 하나씩 등록할 때마다 서버로 보내면(+전체 새로고침) 느리니까,
-// 여기 큐에 모아뒀다가 한 번에 전송합니다. 관리자 패널을 떠나면(페이지 새로고침 등) 비워집니다.
-let adminPendingScores = [];
-
 async function viewAdmin(user, feedback) {
   if (user !== ADMIN_NAME) {
     navigate("#/dashboard");
@@ -630,7 +637,7 @@ function renderAdmin(user, events, settings, names, missions, feedback, diag) {
           return `
         <li class="admin-mission-row">
           <div class="admin-mission-text">
-            <span>${escapeHtml(m.mission)}</span>
+            <span>${m.mission}</span>
             <span class="admin-mission-meta">${m.points}점 · ${
               m.claimedBy ? escapeHtml(m.claimedBy) : "아직 아무도 안 가져감"
             }</span>
@@ -656,41 +663,13 @@ function renderAdmin(user, events, settings, names, missions, feedback, diag) {
       </div>
 
       <div class="admin-section">
-        <p class="admin-section-title">개인점수 선언 <span class="admin-default-points">(목록에 추가만 하고, 아래에서 한번에 전송)</span></p>
+        <p class="admin-section-title">개인점수 선언 <span class="admin-default-points">(등수·개인상 다 여기서)</span></p>
         <form id="personal-score-form" class="admin-stack-form">
-          <select name="name">${nameOptions}</select>
-          <input name="note" type="text" placeholder="비고 (예: 1등, 3등)" required />
+          <select name="who">${nameOptions}</select>
+          <input name="note" type="text" placeholder="비고 (예: 1등, MVP, 수훈상)" required />
           <input name="points" type="number" value="${defaultPoints}" required />
-          <button type="submit">목록에 추가</button>
+          <button type="submit">등록</button>
         </form>
-      </div>
-
-      <div class="admin-section">
-        <p class="admin-section-title">개인상 선언</p>
-        <form id="personal-award-form" class="admin-stack-form">
-          <select name="name">${nameOptions}</select>
-          <input name="note" type="text" placeholder="상 이름 (예: MVP, 수훈상)" required />
-          <input name="points" type="number" value="${defaultPoints}" required />
-          <button type="submit">목록에 추가</button>
-        </form>
-      </div>
-
-      <div class="admin-section">
-        <p class="admin-section-title">전송 대기 목록 (${adminPendingScores.length}건)</p>
-        ${
-          adminPendingScores.length
-            ? `<ul class="admin-pending-list">${adminPendingScores
-                .map(
-                  (p, i) => `
-              <li class="admin-pending-item">
-                <span>${escapeHtml(p.targetName)} · ${escapeHtml(p.note)} · ${p.points}점</span>
-                <button type="button" class="pending-remove-btn" data-idx="${i}">✕</button>
-              </li>`
-                )
-                .join("")}</ul>
-              <button type="button" id="send-batch-btn" class="wide-btn">📤 ${adminPendingScores.length}건 한번에 전송</button>`
-            : `<p class="hint">위에서 항목을 추가하면 여기 쌓여요. 다 모으고 나서 한번에 전송하면 됩니다.</p>`
-        }
       </div>
 
       <div class="admin-section">
@@ -835,49 +814,34 @@ function renderAdmin(user, events, settings, names, missions, feedback, diag) {
     });
   });
 
-  // 개인점수/개인상은 서버로 바로 안 보내고 큐에만 쌓습니다 — 네트워크 호출 없이 즉시 반영.
-  document.getElementById("personal-score-form").addEventListener("submit", (e) => {
+  // 개인점수(등수·개인상 포함)는 바로 서버로 전송합니다.
+  document.getElementById("personal-score-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = e.target;
-    adminPendingScores.push({
-      targetName: f.name.value,
-      event: settings.currentEvent,
-      note: f.note.value,
-      points: Number(f.points.value),
-    });
-    renderAdmin(user, events, settings, names, missions, feedback);
+    const btn = f.querySelector("button[type=submit]");
+    const targetName = f.who.value;
+    const note = f.note.value;
+    const points = Number(f.points.value);
+    btn.disabled = true;
+    btn.textContent = "등록 중...";
+    if (
+      flashAdminError(
+        await API.addPersonalScore(user, targetName, settings.currentEvent, note, points)
+      )
+    ) {
+      btn.disabled = false;
+      btn.textContent = "등록";
+      return;
+    }
+    renderAdmin(
+      user,
+      events,
+      settings,
+      names,
+      missions,
+      `${targetName} · ${note} ${points}점 등록했어요.`
+    );
   });
-
-  document.getElementById("personal-award-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const f = e.target;
-    adminPendingScores.push({
-      targetName: f.name.value,
-      event: settings.currentEvent,
-      note: f.note.value,
-      points: Number(f.points.value),
-    });
-    renderAdmin(user, events, settings, names, missions, feedback);
-  });
-
-  document.querySelectorAll(".pending-remove-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      adminPendingScores.splice(Number(btn.dataset.idx), 1);
-      renderAdmin(user, events, settings, names, missions, feedback);
-    });
-  });
-
-  const sendBatchBtn = document.getElementById("send-batch-btn");
-  if (sendBatchBtn) {
-    sendBatchBtn.addEventListener("click", async () => {
-      const entries = adminPendingScores;
-      sendBatchBtn.disabled = true;
-      sendBatchBtn.textContent = "전송 중...";
-      await API.addPersonalScoresBatch(user, entries);
-      adminPendingScores = [];
-      renderAdmin(user, events, settings, names, missions, `${entries.length}건 한번에 등록했어요.`);
-    });
-  }
 
   // 미션 판정은 그 목록만 새로 받아와서 다시 그립니다(전체 재조회 안 함).
   document.querySelectorAll(".admin-mission-row .mini-btn").forEach((btn) => {
@@ -988,7 +952,7 @@ function renderAdminMissions(user, chips, eventNames, names, query) {
       <li class="admin-mission-row" data-id="${escapeHtml(c.id)}">
         <div class="admin-mission-text">
           <span><strong>${escapeHtml(c.id)}</strong> · ${c.points || 0}점 · ${escapeHtml(c.event || "종목없음")}</span>
-          <span class="admin-mission-meta">${escapeHtml(c.mission || "")}</span>
+          <span class="admin-mission-meta">${missionTokenHtml(c.mission)}</span>
           <span class="admin-mission-meta">배정:
             <select class="chip-assign" data-id="${escapeHtml(c.id)}">${assignOpts(c.claimedBy || "")}</select>
           </span>
@@ -1278,7 +1242,7 @@ async function viewMission(user) {
           return `
         <li class="mission-owned-item status-${meta.cls}">
           <span class="mission-owned-icon">${meta.icon}</span>
-          <span class="mission-owned-text">${escapeHtml(m.mission)}<br/><span class="mission-owned-points">${m.points}점${m.status === "성공" ? " · 내 점수에 반영됨" : ""}</span></span>
+          <span class="mission-owned-text">${m.mission}<br/><span class="mission-owned-points">${m.points}점${m.status === "성공" ? " · 내 점수에 반영됨" : ""}</span></span>
           <span class="mission-owned-status">${escapeHtml(m.status)}</span>
         </li>`;
         })
@@ -1433,7 +1397,7 @@ async function handleScannedCode(user, chipId) {
         <h1>${result.alreadyMine ? "이미 찾은 미션이에요" : "🎉 미션 발견!"}</h1>
       </header>
       <div class="mission-box">
-        <p class="mission-text">${escapeHtml(result.mission)}</p>
+        <p class="mission-text">${result.mission}</p>
         <p class="mission-points-badge">성공 시 ${result.points}점</p>
         <p class="sub">지금부터 미션을 수행해주세요. 진행자가 확인해서 "성공"으로 바꾸면 이 점수가 내 점수판에 자동으로 들어가요.</p>
       </div>

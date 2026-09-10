@@ -35,20 +35,37 @@ async function getParticipant(name) {
   return p;
 }
 
-function resolveMissionText(template, participant) {
+function escHtml(s) {
+  return String(s).replace(/[&<>"]/g, (c) => {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+  });
+}
+
+// 미션 문구의 [파트너]/[네메시스]/[티어] 토큰을 그 사람 기준으로 치환.
+// asHtml=true면 치환값(또는 미치환 토큰)을 색상 <span>으로 감싼 안전한 HTML을 반환.
+function resolveMissionText(template, participant, asHtml) {
   const t = String(template == null ? "" : template);
-  if (!participant) return t;
-  return t
-    .split("[파트너]")
-    .join(participant.partner || "(파트너 미지정)")
-    .split("[네메시스]")
-    .join(participant.nemesis || "(네메시스 미지정)")
-    .split("[티어]")
-    .join(
-      participant.tier != null && participant.tier !== ""
-        ? String(participant.tier)
-        : "(티어 미지정)"
-    );
+  const tier =
+    participant && participant.tier != null && participant.tier !== ""
+      ? String(participant.tier)
+      : null;
+  const vals = {
+    "[파트너]": [(participant && participant.partner) || null, "partner", "(파트너 미지정)"],
+    "[네메시스]": [(participant && participant.nemesis) || null, "nemesis", "(네메시스 미지정)"],
+    "[티어]": [tier, "tier", "(티어 미지정)"],
+  };
+  if (!asHtml) {
+    let out = t;
+    for (const tok in vals) out = out.split(tok).join(vals[tok][0] || vals[tok][2]);
+    return out;
+  }
+  let out = escHtml(t);
+  for (const tok in vals) {
+    const [val, cls, fallback] = vals[tok];
+    const inner = escHtml(val || fallback);
+    out = out.split(tok).join(`<span class="mtok mtok-${cls}">${inner}</span>`);
+  }
+  return out;
 }
 
 // ---------- 설정 (실시간) ----------
@@ -290,7 +307,7 @@ const API = {
       const x = d.data();
       return {
         id: d.id,
-        mission: resolveMissionText(x.mission, me),
+        mission: resolveMissionText(x.mission, me, true),
         points: x.points,
         status: x.status || "진행중",
       };
@@ -320,7 +337,7 @@ const API = {
         }
         return {
           success: true,
-          mission: resolveMissionText(d.mission, me),
+          mission: resolveMissionText(d.mission, me, true),
           points: d.points,
           status: alreadyMine ? d.status || "진행중" : "진행중",
           alreadyMine,
@@ -378,22 +395,6 @@ const API = {
     );
   },
 
-  async addPersonalScoresBatch(_adminName, entries) {
-    return adminWrite(async () => {
-      const batch = db.batch();
-      entries.forEach((e) => {
-        batch.set(db.collection("personalScores").doc(), {
-          name: e.targetName,
-          event: e.event,
-          note: e.note,
-          points: Number(e.points),
-          ts: serverTimestamp(),
-        });
-      });
-      await batch.commit();
-    }, entries.length);
-  },
-
   async getMissionsByEvent(eventName) {
     await authReady;
     const snap = await db
@@ -406,7 +407,7 @@ const API = {
       const p = x.claimedBy ? await getParticipant(x.claimedBy) : null;
       out.push({
         id: d.id,
-        mission: p ? resolveMissionText(x.mission, p) : x.mission,
+        mission: resolveMissionText(x.mission, p, true),
         points: x.points,
         claimedBy: x.claimedBy || null,
         status: x.status || null,
