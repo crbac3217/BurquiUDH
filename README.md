@@ -16,8 +16,8 @@ js/app.js                       로그인 지속 + 해시 라우팅 + 화면 렌
 js/vendor/jsQR.min.js           QR코드 디코딩 라이브러리 (MIT, 로컬 vendor)
 assets/background.svg           배경 이미지
 firestore.rules                 Firestore 보안 규칙 (콘솔에 붙여넣을 것)
-sheet-template/mission-qr-print.html   히든미션 칩용 QR 인쇄 시트
-sheet-template/qr-codes/        미션칩 QR PNG 낱개 파일
+sheet-template/easy-sheet.html  · middle-sheet.html · hard-sheet.html   난이도별 QR 인쇄 시트 (A4, QR 2cm)
+sheet-template/qr-codes/        미션칩 QR PNG 낱개 파일 (58개, 파일명 = missionId)
 ToClaude/                       (git 제외) 마이그레이션 원본 xlsx 등 작업용
 ```
 
@@ -109,10 +109,10 @@ PIN 해시는 클라이언트에서 검증합니다. 즉 `logins` 문서를 읽�
 
 ## 미션 QR 칩 준비하기
 
-1. `sheet-template/mission-qr-print.html`을 브라우저로 열어 인쇄(또는 PDF 저장). `sheet-template/qr-codes/*.png` 낱개도 있음.
-2. 잘라서 현장에 숨깁니다. 라벨엔 QR + ID만 있고 미션 내용/점수는 없음 (스캔해야 보임).
-3. 각 ID의 미션 내용은 `missionChips` 컬렉션에서 확인.
-4. 칩을 더 만들려면 `missionChips`에 문서 추가(문서 ID = missionId) 후 같은 방식으로 QR 생성 (`qrcode.make("M99").save("M99.png")`).
+1. `sheet-template/`의 **`easy-sheet.html` / `middle-sheet.html` / `hard-sheet.html`** 3장을 각각 브라우저로 열어 인쇄(또는 PDF 저장). QR은 실제 20mm(2cm), A4 한 장에 6열 그리드. 인쇄 설정에서 **배율 100% / 실제 크기**, 머리글·바닥글 끄기.
+2. 점선대로 잘라서 현장에 숨깁니다. 라벨엔 QR + ID만 있고 미션 내용/점수는 없음 (스캔해야 보임).
+3. 각 ID의 미션 내용은 관리자 패널 "미션칩 전체 관리" 또는 `missionChips` 컬렉션에서 확인.
+4. 칩을 더 만들려면 관리자 패널에서 추가(문서 ID = missionId) 후 QR 새로 생성 (`sheet-template/qr-codes/`에 `qrcode.make("EZ99").save("EZ99.png")` 식으로). 그리고 이 인쇄 시트를 다시 생성(scratchpad의 `build_print_sheets.py`).
 
 ## GitHub Pages로 배포하기
 
@@ -126,4 +126,4 @@ QR 스캔(카메라)은 **HTTPS에서만** 동작 — GitHub Pages는 기본 HTT
 
 - 실시간 리스너를 팀 점수판/개인 랭킹/내 점수 화면에도 확대 (지금은 `config/settings`만 실시간, 나머지는 화면 진입 시 1회 조회)
 - `missionChips`의 중복 ID `MD14PT1` (자동으로 `MD14PT1-2`로 저장됨) — 필요하면 콘솔에서 정리 + QR 재생성
-- `sheet-template/`의 xlsx/mission-qr-print는 이제 참고용 (백엔드는 Firestore)
+- `sheet-template/`의 xlsx는 이제 참고용 (백엔드는 Firestore) — QR 인쇄 시트는 최신 상태

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>미션 QR — 중간 (MIDDLE)</title>
+<style>
+  @page { size: A4; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body { font-family: sans-serif; margin: 0; }
+  .head {
+    display: flex; align-items: center; gap: 8px;
+    border-left: 6px solid #e0a415; padding: 6px 10px; margin-bottom: 6mm;
+  }
+  .head h1 { font-size: 15px; margin: 0; }
+  .head span { font-size: 11px; color: #666; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, 30mm);
+    gap: 2mm;
+  }
+  .cell {
+    width: 30mm;
+    border: 1px dashed #bbb;
+    border-radius: 2mm;
+    padding: 2mm 1mm 1mm;
+    text-align: center;
+    page-break-inside: avoid;
+  }
+  .cell img {
+    width: 20mm; height: 20mm; display: block; margin: 0 auto;
+    image-rendering: pixelated;
+  }
+  .cid {
+    margin-top: 1mm;
+    font-size: 8pt; font-weight: bold; letter-spacing: 0.02em;
+    word-break: break-all; line-height: 1.1;
+  }
+  @media screen {
+    body { background: #eee; padding: 10mm; }
+    .grid { background: #fff; padding: 10mm; }
+  }
+  .note { font-size: 10px; color: #888; margin-top: 4mm; }
+  @media print { .note { display: none; } }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>미션 QR — 중간 (MIDDLE)</h1>
+    <span>17개 · QR 실제 크기 20mm · 자르는 선(점선)대로 오려서 현장에 숨기세요</span>
+  </div>
+  <div class="grid">
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABdklEQVR4nO1Z7W7DMAgEtP/O+z+l/QRMxo6/Mq3VtHZmuVMUJfSkFC7EBljpCSR5hkUE2gIEZAEC8vOAcMPRf5iNCO+C7QMStIBMynw+JqMDFx5D7kbjM0k1ZkE1TkYXLjyC3Ib2cTVpYgrxlQ8V0N6pKRNxUH7tQwW0N2iq572mvk8ayhyosGB7TVPPS25JOhj3dkFAu2o6th00cV5PZyPi5upFolythH6oFS+1igmq0a7jzi4IaAtMMmryUStLRws09fQiUU1Mk5VKnl4uoKk7TTXWJoOW85inNYV3dkFA+7KWYdsU8VnLsPUcyh7YNkuI24KdA0I6g0L9FNcD66nPPOV2F2IrYdiNCwLa93OZgtLG58MGNBmI2wIHAeFzBMPjdKar7MCFR5Db9vC1DGVKhzAdua30Z/9NQPuduUzIarItrGz1qe2BEd4FvuYyrL2uYQ8uCGgLxq0RlUJm7gCj5+B+LkP1PB57uyCgzUBAFvyDgHwCaEnjtTQ1NsQAAAAASUVORK5CYII=" alt="MD01YG" />
+      <div class="cid">MD01YG</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABf0lEQVR4nO1a0W7DIAy0rb27//+V8AWuMBAIS5do6iZo7oRU4p5a+RwCtsNGFxDlCosItAEQZAAE+b0gvOHhtsjfjJB3wPSCqGWQh7J80xkXcOEccjca10Vqgcpq7YxLuHAGuS9NfbU+/vdPjwHaewRh5hzWt/zaC4D2p4J85Y8tikZUN9RmRBTWuy1jOeFS/9TtjAu4cA651Tq17toim+cytowLAtqAlK1oG+bJS8li1Cz4PEC3AdPHlDwbDSmRaZGtAfXJzC4IaIdnpAzeJhrSYUktT6Dbivsp+4XFdEKybNFQ9lYNc7sgoA3w7ZLGeqDWUQjQbcDMgpDtQV4eLKOdlGZ2QUD7uS9jdc3mRBX13lVvJO1aMFrqvamYv/Vo5nfhHHI3GtcWDHscc3em7bMruHAGuWcuQ+XEm/bQFFo1ioxc5hP6MuSL1Cz3aPCew7TBut6XoZqxpnTVM9a5XRDQBtS3Uxy6q/22IjBymaX7MnQw5nZBQNsDggz4AEGePA3IYs8MB2EAAAAASUVORK5CYII=" alt="MD02DJ" />
+      <div class="cid">MD02DJ</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABfklEQVR4nO1aUW7sIAwcW/2H+58STjAVOKQEUSWq9F6h8QhFwYy08Xi92GGFeICsT1iA0wa4IANckJ8LIicikMUWLkaXd7vvW6ABgMQazXgxbuDCPfRtNDnyEUxfa6dxCxfuoK+hfYyGULP1336oOu1/xlSAWSXsUdgvpmxzdmvcwwV12kSQfFS4sBrJ9tDO6Lptl6fs5szC2s5wGxfUaZP+tObmkaGBZ/Xbtauu24CVBUHpQGscrSHFeRPIdKwyreyCOu27utd+chGSABISy5V247rtF9MsFkG0zrRO07G3hrS2C+q0SY2UI3IpduXIynJTr2ztqus2YGVBwCtgxlSHWXw/3fxchi2s/RnN+i48gL6LFrokzcJUAmrX33+2e+gDDl5Ik3YEI+10xsK6wrPdQW8ZL3+HzxxLAVyro9K35ug10u40adlKsrzsDfT/OSwbrKfnMrkkZulPux5nbRfUaQPOQrcgcDr83eDe5zKYjLVdUKdd4YIM+AOCfAJB566++5zp0wAAAABJRU5ErkJggg==" alt="MD03RT" />
+      <div class="cid">MD03RT</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABhUlEQVR4nO1aUW7DMAgFtH98g93/WLuBOQETsZ04bFOiatqMwlM/XPqUFogdeBQVbkDoDgsgaQ4ZEIcMyGsBAdVpp/K2Zu2LYdSa4XVYPiCsDTDjZFzehWvQ02iIiMUWlkRBZwzhwhXosTQs7bD90y/9AUl7LSBv7r0K2uvFq1HS1smpTiYEQK5nYybLYfmcCh4JZUWueDau7QIl7WtOTyet2NnrjRm3aDcSFitxQazO3TsaK5ZkM5YALtwAPXCfIiuI5e84eFkxgAuUNAeTFepQkKA3Ml1uOBYZN4cY2qCOPB7G1qimNhiTpnVSjVixmMWMqSPFfZ7yKI3YtEGdHq+6uguUtG/q3h2lV0e2Tz+2jqZv1Yybw/KaA3d5F9t62rNZ90bNKYxsgp20XUdq+kP7aGkXKGnXcxnZlIc2GRfcKuGMm0OkuQwIAlfT8PdK6d9+GyXtV+YyKkX7xG0vejO8Ae836WUvAOC7Nad7lzqmM8u7cA16DA3zv6BxkkVJO+M5AfkEvG2mZedVOhMAAAAASUVORK5CYII=" alt="MD04MZ1" />
+      <div class="cid">MD04MZ1</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABbklEQVR4nO1ZUW7DMAgFtH/n/rfbDewTMAVs1/G6pqq0zTTvybIMeWoDmMQEVnoCRZ5hEYE2AQ6ZAIe87hDu2HYVbzYOSrh3wvIOSeogCygVnpQBTDiHXI3GLUn1kzWT5oMyhAlnkMvQPr6rmIhT/s0/FdD+Mqac7An84q8JaOvkqTZZh2vDGsGasLxDSj3hUjv0TsoAJpxDLpWnOshaWO3cq2FMENDu1KdekLYM5a2de3tdA79F2khUK9CkewkzoGtssbIJAtqEGjWbqYk3jX95QEwjbSS6k5WjJnsKr2yCgDbhQYZS0yOmoTYS6RHkSstQT1LkacRahruUsjbRZ61FzcomCGiP+zJkSerlTC9t4LeIG4l785T3RQ2rKvoycWPaoe0duguFvfW2yL39ANDO+jJks79Yk9rI8Fv0vgy32T///t+9CWivx7TcTr7sAU2ZUrbmuNo1uHdCqL4M1Xkca5sgoB0Bh0x4A4d8AdQ11wm+vKi+AAAAAElFTkSuQmCC" alt="MD05MZ2" />
+      <div class="cid">MD05MZ2</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABc0lEQVR4nO1Z0W7DIAy00d7J/39l+IKbDJhR1jbVNGl4vRNC4PghtnFyxgp5ASW9oiVCtQV0yAI65OcO0YFDpKhJjlsh3RvpvH3YlM+20TpEBLfCvU1IVLvrEM9HwWnrRUi/xcvTGRnRTEhUe+4QPfp4rvYAVNsoT+F7TM+mNYO1YHuHlM5wpeZpxyQMYMI10lvlKaY9irZyBmFMSFS7U5/6P1Sd+qLWMaNcpd9CHSQBIBktiGjriib0xc4mJKot6CH03JQpslbXtBAzppEOkswRxBTHnqenVayMacRaRispUpdqvRjUjCbf24REtfvfXoc4Rxo/U+ZpxDzVscvnyFabi/Fg5mm0mMrKdeEceGbC5EiR+zJaL46sO3P0+c/f7QrpUuPN+zKo1EgqOzIU5bf3H/RlpM4AxrzJuz0A1a76MqVf9lo5k0+nT/Tbgu1jWr6Yr9aeeKtPDT2sO5uQqHbRl5E+z4N++wYepAV0yILfdcgngeC/5h48O7UAAAAASUVORK5CYII=" alt="MD06PA3" />
+      <div class="cid">MD06PA3</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABe0lEQVR4nO1a0W7DIAz0ob3T//+7/UH4gpvAkBG2NtWmVbDcqarAPSnyWQ62KWhPIIVnWGaiDZAgAyTIzwQxssvUyPzxRWfkJnkHTC9IpMMK6uJgnN6Fc4Sr0QDgVlYpL0fjCi6cIVyG9jbsaYby/ZcPDaK9UhAAJFt6vuihdyDar/KUbc/8+q0R7bJV8g6YPqYJn3kaN0TiaJzbhSDa15j2pycTWKJ5PFKl24CZBbHcreQOtO1j7V/cXi3qT1eLKVtA6Q2pTx7a/KEQZnYhiPa9ICWCAPwY5Xs5TBPaQEm6DZhZENsTc09YbjVh89Z/Up4uWCOxjBos10g3z03E+kbm7C4E0e7NkfwlC+9P4+bbVv1KtwFL3ctYZyn1sGqk5e9lImuZ1LZlTji9C+cIV3v3Iodv69c+yccCLgTRHt/L2HHwq/P0P9y1JXAY/Ob8ndmFINrjexmLzF1MuZrpBr/SbcBida/tA0PVvUvGFPov6DrBCqIdcR1BPgCs0MRclof/5wAAAABJRU5ErkJggg==" alt="MD07DSN1" />
+      <div class="cid">MD07DSN1</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABgklEQVR4nO1ZS7KEMAgEavbx/qc0J+AVEDWir2LNKoz0wjKxFwM9hE+Q4QEqPWEBJM0hHeKQDvnOIcDcRWrR98Juk9d0r8P0DikiounIK0BFXE6bAUwYg95GQ1QdAXBRWc+bIUwYgV5D+7g11wUBOJIJlLSBQwpD4S08/6fdI2kTxSlva+yWXbSmWA7TO6RK5kTEvfSVOO035zdhDHoNDa8zB7zm05w5RKPhooGpha7tWpx2n2Y34QHoVfmUpdwVBRkAywpl3Q9h25/bBEqaQxs1sJS7sL20p2ori5wjRfojwSGiDpHa7GiXtYk7swmUNAcNw9aWgs0GnaAZpxH706JqWj7VHMq1DR0kn0p6ndkEStpV01bsirhSIOGmbEdLvznEyKd8nLT+BM58GvpeBvSibe9PW68awYQR6L20coStqawdzRy/7R5JGzgEEa0t7cM2/Rb6Xob1iWW14ZJVwnObQEm70bQrcbFravSThWv6zSHYvcwN8l4mkqaUtDN+wCF/O8nH15WNWiUAAAAASUVORK5CYII=" alt="MD08DSN2" />
+      <div class="cid">MD08DSN2</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABeklEQVR4nO1aQY7DMAgEa+/OD/b/v4tfwApw4oTtNlUOK9POyIpiitrCZJyAw0IvoJVXvIjgFoCEBCAh9xPCOxaixv7ByYj0prveqjiIiBcdwZgghGuUT3PjrkeSVUcwpgjhCuWT3XhQ+X8/+ghwu5eQrzBnIrHjrW8rcJuHU9nm0oZED2UOyAqYntM2dMlVuK7BOHcIBW6/OT22HaSxs3nuRSBvATMnhLRaqWOIFS+9iqmij8Eiss4cQoFbwJFEsUImEGonyFtABp2SlaXVVtxdsNsJOM3HqcOEOdpHrlO3QKfpOK194Y132G0KTtNxegRt8tzvrdBpxlqG91ldpbHrU42bVOcOocDt+b4MGY+8qEjHHg3ylrA3yCZS0j7Sqi3fttixa3buEArcnvfwxcmt4muvt/SRt9QXEjP7qisi+3GS//YH4Ha1L0O6/Pp2mxr7Ng3yFjB9Qlp/84js6agfqyqUv/HuSv59GXow5g6hwO0MJCTgDRLyA4Os5uTuJnHQAAAAAElFTkSuQmCC" alt="MD09MR" />
+      <div class="cid">MD09MR</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABc0lEQVR4nO1aW47DIAy0rf2n9z8lnMArMJDEfRCtKi2IGUWV485HPO4QHmWlG0hyh0UEmgMEcYAgfxeEOx4ll3JwTUJeh+kFCWqg1lCfnL+EMWQ3GneTErU+npMLlDCCbEP7eU4xka5UgoA2ECTk8bZ79i3tNUCbyKfa7jlEbvHJrWiWw/SCpDrDJUPQp+T0JYwhW/lUT/eaWFPuoy5TgoDmkGe5QTWSxuLQcNzWxYyqRujmsEBPyVaj8Whl7WwNZi5BQHOw1Wg1KTWrlnz9Cj5d7IdEZs9jvI2nUbfH8Om6Pg3XqxHQ0+V6egaV/uYoNgbep4ufy6hNmWw5czR39hJuQPaihcOkbKdsZW8wx+VaoIQxZLe9Qc6djX2rQS1TtiD+79kEtK+cy3ALND16ZyHv0r83Le/TPN62z3me7Q1AG5zLUInrkJu45aGbw8yCUP9XQ0aoW4I2a7JMmfrOXIKAdkV34kck6OYAQRwgiMN3BfkFIg7wPSafam8AAAAASUVORK5CYII=" alt="MD10GG" />
+      <div class="cid">MD10GG</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABfElEQVR4nO1aQW6EMAy0o70n//9df0BeMFVssoQUiVV7aCxmhCCyfMBj2UwcFPIBavrES4RuE0jIBBLyO0IEGCo12zpjX3QjNtI7YXlCMhzi6y+djeuHcI/0GLeXP1oW89bKtqpk6Nm4dgiJbpc5fUObIvKUjiBvgXMKSysihZDodpnTKYnqffgwkLcJyxNS1SEiWrr6HYwBQrhHelSd4myCfU8RJoREt5+EaJFWj1aY+0bGC7aasZC3gN/TqqjFpZG62aVv39SsHUKi2/X+1NKnk+6tpXdg8jZhdULQx4MAWs3amKE1Ymu/7L3Rcipt/LeJXzts3ntYOO+NmNMB4tn0hdVve3CGH073vlF2qxZpAtj6MHtvSI2Ut3HYi37Q5sLp/94t0e0vhGgvUowC6ZBPpHdCsHMZ9R1N3vQYKK0cQqLbLSEAfBfTanbvw+RtQqRzGfjdJkvDHywrh5Dodnsuo65+c5s/9PNx8jZhZUKU/4LGSVai2xnPIeQbEPKg+SwGDu4AAAAASUVORK5CYII=" alt="MD11PGP" />
+      <div class="cid">MD11PGP</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABZUlEQVR4nO1aW47DIAy00f7DDfb+x+oN4AReYSABtyrVPlTYzChKI9dq5HEdeyAs9AKSe8WLCG4GIMQAhHyfED4Qzi9GI+g1WJ4QLwWkqHkcjMuHMIe7mhu3ImXmnM04GLcIYQZ3abfEb7jpA8DtlwjxQl76xvqjX3sMuP0pIR/lY1A0icUakQWD5QlJdcKlglKng3H5EOZwl6pTuWumYoxLh+DgZpDVim8J9KpeohoHC3gzWJkQqio00nH02awXyOmGOSUdd+lYZ9DKPezI6Y4zkty0jd7yIkOei1JeeeiE6vIhzOEuV6dUlSm1i/M5jDrdWZ9Kd672FJYPwcHN4Bxx+7m3jb6lpaKf7vdH8ucWDAfiT30Ia0vFmsPe+tS3cberU+jTfftpD26HpCAbhODgNt2XkW5lCfun/2BfRrRCtZnGok7Zx7VDcHB7vi/DwepTPYM3g5UJYbwLuk+yHNxGXIeQL5hhyqStcQd/AAAAAElFTkSuQmCC" alt="MD12PGN" />
+      <div class="cid">MD12PGN</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABdklEQVR4nO1aW47DIAy0rf13brD3P9begJxgVuaREBo13X6scONRhICMFHlcGzBl0AtY5RUWUdAGhCADQpD3BCGgi1QFUu0cJ0PeAdMLoiggIv5u3uwmHZhwDbkbjZl5sQ5+eHu3Tbow4QpyX5rikHj/56PnCNp7gnwNYz6nhbz+fIo2RvcOPkyQoJ0IstrKyWwxyos9w2To5i5O0Y2RvTlMzm2CBO1RkBKbe4QSlVOqDbN/QzeX6+m6xyZyy5qwMhSsaW4TJGgDrKyQWjVJW50hd8q5JhNCtwEefJpaYVAPbm3zM5sgQTvNvZZ5VyYF56yb8611WioO3QZMH6cdKG+Q9qcEbMSpN5/SBt3dWl/Feur/XoayQ3mpbT3RzG/CNeSO66nWNZTtaLPkluHABAna8xo+inPzZqm0sUfy/kPiVvUFYH1F5N5pnfWnexlsB5moDX7AvQzXODUo2l9ZpjfhGnLrexmytn/mNkGCdkQIMuADBPkF2GzLtazVtMgAAAAASUVORK5CYII=" alt="MD13MM3" />
+      <div class="cid">MD13MM3</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABfklEQVR4nO1ZQW7EMAgE1Lvzg/7/Wf2B/YKpwHY2oavNqpeahlG0MmQOCw4GDIPeQJN3WERJc0iHOKRDfu8Q3rHpmho7Zbo33vdW0EFEqPPNQRnAhGvI3Wg84pGogD/hlRFMuILchvbhZNaKiBHJBEnapUMAzPB8RXuGpC0UpzioeIoHZW6Ww/IOaaPCJcunmlK3s3J9E64ht4pTOF3jH8qVTZCkOWi3Ym2LRqgB9dHRjLc1/eYQIJ+yBSZsoU8BtU3FUrG6CZI0Bw3Ramm0ixah86oh4zTsnmJsK/rvvsvzTM6zN9zZy6VyQT91qYu2OHQ0K5sgSXta9+4Pu1619Gop/eawukP4NIIZ2EvfnMv8h7lMY02mTYdu+Mo7h8C9DNkx25PpaGpmMby2CZK013MZNEbbZls6qqb0W+g97ehxerghXNkESdpTh4yelEZbOlKqFUhZI4X8kNpjBMO2ib0A1qrJ7vMDmHANue1cBvPZxb/7b5K0M9IhDvdxyDf5saTSwwKi4gAAAABJRU5ErkJggg==" alt="MD14PT1" />
+      <div class="cid">MD14PT1</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABeElEQVR4nO1aQW7DMAyThN2dH+z/z9oP7BdwsGw3bpCtwTCgFkIeWkfhIRJDV7arkAsodoUlQtoBLMgBLMjfC6IPbHUsRQ9Bljfe+5bQID7ud+bg+im8ht2Npt2PglzVbONHMEQKr2C3oX0crlUEwVIw0n7XFOeysm7xNMUUQtk05efgyikYaSeaeqPboClrgj4HWbdwmmIOFIWriTApGGkn69OxLFVVYDS9m1u1cH0a7kWSsQL1cd4/91sJyCunYKT9VBBk96bvOfTdhlJt6xKzbgesXhDkLigmz9YJ2adf7g1G1FQ/+xyrbdfIB/iqJn37s12AXSHJDfve5FOuVLQ9B02QsqEHV07BSDtgnm8lwTui1hftQfZI8fYcUtdP29c4mnG35uVTMNJOfNpEnEzaLrtV6dP45zJStDq0KMZP6topGGkvC4JpK6m3xKxb5HMZlConhlXf+mxG2j+dy2D0Rd47ubgsb6j3Tflf0DhiGWnPuE9BvgEW7J0CJgyplAAAAABJRU5ErkJggg==" alt="MD14PT1-2" />
+      <div class="cid">MD14PT1-2</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABcUlEQVR4nO1aS67DIAwco+7JDXr/28EJ/MQvAfqkRO0iWJkRSqjlRezBGOyK4gKiu6IFUG0CHTKBDvneIbJjA6IkyTYK6V5z681rAQB5ayZxEBow4RzuMWqv8krB6QMABTSHai9c2wRHtX85PRA3+M9zE/1mmFMpcVrD895vc1T7hVNtvzVuidZRSPeaWm9op6AMr8fohBpWNsFR7TNO+/Sp7TnmVPptwuoOke0YADTUyX5dXd+EC3CP2ns1H4g05HneitO8DE37MPdee5xqpRWJvspmTbWl8sB8ao7TcDCrXdgWihmnJjnVut8m5BPvHqeN5ZVNcFSboCOws7zXe5lPjd9PC8qkXFQTGKfmOPUDlQU1mbLmYFZNap8U/UVV3pncu7/tDO5U4+E1fI2CKNpGqyytbIKj2mlfpmueqvggqUdDv00w1ZdBaqHmjlt5sjZok9MoQ/8UR8dNvMrqJjiqjRD+F3QEV8gEOmTCLQ75A1bqAgnLrtvzAAAAAElFTkSuQmCC" alt="MD15L" />
+      <div class="cid">MD15L</div>
+    </div>
+    <div class="cell">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAABaUlEQVR4nO1ZW27EMAgE1H/n/rfbGzgnmMqv1GGrZlWprWlmvgKLtAEytsco5AXs9kqUCMMcWBAHFuR7BRFgYmqqzwnOiczyOixfkFSaePQRD31yLp/CNexuYaqqm/9tcgZI4Qp2m7A3Z0NEf/xPjWG/WRDdyqr7xFl2IR5PMWwU5dKZihgpGMM+Kchedk5VPXjqnKxbOJ5isjF4ijApGMMcilopCnTYqeuX5u8e6tNwH9I+BGkWZH9Mqu1ePoVr2G3C5LhY6FRN1c6nOyXyNKQ+TVmHOC0PtaHdTHntFIxhDh9XgmMb7cxtS3ED99NoHxKO5RfoAmbrt768G/w3cxkZZttYydPYc5mErk+PIxPPvcF6KrMOlYmhva3VSZ6GnstIyrJv84AGq6dgDPu6IHhoW2/LMSnXW9/SYdbNIdJcRpogrVTVhCZa107BGHZx7k1nldqeqU+Dz2VwNv/u3YxhZ7AgDvcpyDu0GtSIMh14ZwAAAABJRU5ErkJggg==" alt="MD16G" />
+      <div class="cid">MD16G</div>
+    </div>
+  </div>
+  <p class="note">인쇄 시: 배율(Scale) 100% / "실제 크기", 머리글·바닥글 끄기. 미션 내용은 안 적혀있어요 — 스캔해야 보입니다.</p>
+</body>
+</html>
