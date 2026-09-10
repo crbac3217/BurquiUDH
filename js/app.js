@@ -365,25 +365,33 @@ async function viewMyTeam(user) {
 async function viewSupplies(user) {
   const groups = typeof SUPPLIES !== "undefined" ? SUPPLIES : [];
   const mine = groups.find((g) => g.who === user);
+  const everyone = groups.find((g) => g.who === "전원");
+  const isAdmin = user === ADMIN_NAME;
 
-  const groupHtml = (g, highlight) => `
-    <div class="supply-group${highlight ? " mine" : ""}">
-      <p class="supply-who">${escapeHtml(g.who)}${g.who === user ? " (나)" : ""}${
-        g.who === "전원" ? " 공통" : ""
-      }</p>
-      <ul class="supply-items">
-        ${g.items.map((it) => `<li>${escapeHtml(it)}</li>`).join("")}
-      </ul>
+  const itemsHtml = (items) =>
+    `<ul class="supply-items">${items
+      .map((it) => `<li>${escapeHtml(it)}</li>`)
+      .join("")}</ul>`;
+
+  const block = (title, items, cls) =>
+    `<div class="admin-section">
+      <p class="admin-section-title">${title}</p>
+      <div class="supply-group${cls ? " " + cls : ""}">${itemsHtml(items)}</div>
     </div>`;
 
-  const mineBlock = mine
-    ? `<div class="admin-section"><p class="admin-section-title">내가 챙길 것</p>${groupHtml(
-        mine,
-        true
-      )}</div>`
-    : "";
-
-  const allBlock = groups.map((g) => groupHtml(g, false)).join("");
+  let body = "";
+  if (isAdmin) {
+    // 관리자(준비 총괄)는 전체를 봅니다.
+    body = groups
+      .map((g) => block(escapeHtml(g.who), g.items, g.who === user ? "mine" : ""))
+      .join("");
+  } else {
+    if (mine) body += block("내가 챙길 것", mine.items, "mine");
+    if (everyone) body += block("전원 공통", everyone.items);
+    if (!mine) {
+      body += `<p class="empty">내가 따로 챙길 준비물은 없어요. 위 공통 준비물만 챙기면 돼요! 🙂</p>`;
+    }
+  }
 
   $app.innerHTML = `
     <section class="card">
@@ -392,11 +400,7 @@ async function viewSupplies(user) {
         <a class="ghost" href="#/dashboard">← 뒤로</a>
       </header>
       <p class="hint">대회가 시작되면 이 화면은 볼 수 없어요. 시작 전에 각자 챙겨오세요.</p>
-      ${mineBlock}
-      <div class="admin-section">
-        <p class="admin-section-title">전체 목록</p>
-        ${allBlock || '<p class="empty">준비물 목록이 아직 없어요.</p>'}
-      </div>
+      ${body}
     </section>
   `;
 }
