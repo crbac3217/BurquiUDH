@@ -696,6 +696,14 @@ function renderAdmin(user, events, settings, names, missions, feedback) {
       ${eventSection}
 
       <div class="admin-section">
+        <p class="admin-section-title">데이터 관리</p>
+        <a class="menu-item" href="#/admin/missions">
+          <span class="menu-icon">🎯</span>
+          <span>미션칩 전체 관리 (실시간)</span>
+        </a>
+      </div>
+
+      <div class="admin-section">
         <p class="admin-section-title">개인 랭킹 공개</p>
         <button type="button" id="ranking-toggle-btn" class="wide-btn">
           ${
@@ -800,6 +808,200 @@ function renderAdmin(user, events, settings, names, missions, feedback) {
   });
 }
 
+// ---------- 관리자: 미션칩 전체 관리 (실시간) ----------
+
+let _adminMissionEditing = null; // 지금 수정 중인 chipId
+
+async function viewAdminMissions(user) {
+  if (user !== ADMIN_NAME) {
+    navigate("#/dashboard");
+    return;
+  }
+  $app.innerHTML = loadingCard("불러오는 중...");
+
+  const events = await API.getEvents();
+  const eventNames = events.map((e) => e.name);
+  let chips = [];
+  let query = "";
+
+  const rerender = () => renderAdminMissions(user, chips, eventNames, query);
+
+  _activeUnsub = API.onMissionChips((list) => {
+    chips = list.sort((a, b) => a.id.localeCompare(b.id));
+    rerender();
+  });
+
+  // renderAdminMissions가 검색어 변경 시 query만 갱신하도록 closure 노출
+  window._adminMissionsSetQuery = (q) => {
+    query = q;
+    rerender();
+  };
+}
+
+function renderAdminMissions(user, chips, eventNames, query) {
+  const STATUSES = ["진행중", "성공", "실패"];
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? chips.filter(
+        (c) =>
+          c.id.toLowerCase().includes(q) ||
+          String(c.mission || "").toLowerCase().includes(q) ||
+          String(c.event || "").toLowerCase().includes(q)
+      )
+    : chips;
+
+  // ID 앞 2글자로 그룹
+  const groupLabel = { EZ: "EZ · 쉬움", MD: "MD · 중간", HD: "HD · 어려움" };
+  const groups = {};
+  for (const c of filtered) {
+    const key = c.id.slice(0, 2).toUpperCase();
+    (groups[key] = groups[key] || []).push(c);
+  }
+
+  const eventOpts = (sel) =>
+    `<option value=""${!sel ? " selected" : ""}>(종목 없음)</option>` +
+    eventNames
+      .map(
+        (n) =>
+          `<option value="${escapeHtml(n)}"${n === sel ? " selected" : ""}>${escapeHtml(n)}</option>`
+      )
+      .join("");
+
+  const chipHtml = (c) => {
+    if (_adminMissionEditing === c.id) {
+      return `
+        <li class="admin-mission-row editing" data-id="${escapeHtml(c.id)}">
+          <div class="admin-mission-text"><strong>${escapeHtml(c.id)}</strong></div>
+          <form class="admin-stack-form chip-edit-form">
+            <textarea name="mission" rows="2">${escapeHtml(c.mission || "")}</textarea>
+            <div class="admin-inline-form">
+              <input name="points" type="number" value="${c.points || 0}" />
+              <select name="event">${eventOpts(c.event || "")}</select>
+            </div>
+            <div class="admin-mission-actions">
+              <button type="submit" class="mini-btn active status-성공">저장</button>
+              <button type="button" class="mini-btn chip-edit-cancel">취소</button>
+              <button type="button" class="mini-btn status-실패 chip-delete">삭제</button>
+            </div>
+          </form>
+        </li>`;
+    }
+    const cur = c.status || (c.claimedBy ? "진행중" : null);
+    const statusBtns = STATUSES.map(
+      (s) =>
+        `<button type="button" class="mini-btn status-${s}${
+          s === cur ? " active" : ""
+        }" data-id="${escapeHtml(c.id)}" data-status="${s}">${s}</button>`
+    ).join("");
+    return `
+      <li class="admin-mission-row" data-id="${escapeHtml(c.id)}">
+        <div class="admin-mission-text">
+          <span><strong>${escapeHtml(c.id)}</strong> · ${c.points || 0}점 · ${escapeHtml(c.event || "종목없음")}</span>
+          <span class="admin-mission-meta">${escapeHtml(c.mission || "")}</span>
+          <span class="admin-mission-meta">${c.claimedBy ? "🙋 " + escapeHtml(c.claimedBy) : "아직 아무도 안 가져감"}</span>
+        </div>
+        <div class="admin-mission-actions">
+          ${statusBtns}
+          <button type="button" class="mini-btn chip-edit" data-id="${escapeHtml(c.id)}">수정</button>
+        </div>
+      </li>`;
+  };
+
+  const groupsHtml =
+    Object.keys(groups)
+      .sort()
+      .map(
+        (k) => `
+      <div class="admin-section">
+        <p class="admin-section-title">${escapeHtml(groupLabel[k] || k)} (${groups[k].length})</p>
+        <ul class="admin-mission-list">${groups[k].map(chipHtml).join("")}</ul>
+      </div>`
+      )
+      .join("") || `<p class="empty">검색 결과가 없어요.</p>`;
+
+  $app.innerHTML = `
+    <section class="card">
+      <header class="topbar">
+        <h1>🎯 미션칩 전체 관리</h1>
+        <a class="ghost" href="#/admin">← 뒤로</a>
+      </header>
+      <input id="chip-search" type="text" placeholder="ID / 미션 / 종목 검색" value="${escapeHtml(query)}" />
+      <p class="hint">전체 ${chips.length}개 · 실시간 반영. 누가 스캔하면 여기 바로 떠요.</p>
+      ${groupsHtml}
+      <div class="admin-section">
+        <p class="admin-section-title">새 미션칩 추가</p>
+        <form id="chip-add-form" class="admin-stack-form">
+          <input name="chipId" type="text" placeholder="missionId (예: EZ99, QR에 인쇄될 값)" required />
+          <textarea name="mission" rows="2" placeholder="미션 내용 ([파트너]/[네메시스]/[티어] 사용 가능)" required></textarea>
+          <div class="admin-inline-form">
+            <input name="points" type="number" placeholder="점수" required />
+            <select name="event">${eventOpts("")}</select>
+          </div>
+          <button type="submit">추가</button>
+        </form>
+      </div>
+    </section>
+  `;
+
+  const search = document.getElementById("chip-search");
+  search.addEventListener("input", () => window._adminMissionsSetQuery(search.value));
+
+  $app.querySelectorAll(".mini-btn[data-status]").forEach((btn) => {
+    btn.addEventListener("click", () =>
+      API.setMissionStatus(user, btn.dataset.id, btn.dataset.status)
+    );
+  });
+
+  $app.querySelectorAll(".chip-edit").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      _adminMissionEditing = btn.dataset.id;
+      renderAdminMissions(user, chips, eventNames, query);
+    });
+  });
+
+  $app.querySelectorAll(".chip-edit-cancel").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      _adminMissionEditing = null;
+      renderAdminMissions(user, chips, eventNames, query);
+    });
+  });
+
+  $app.querySelectorAll(".chip-edit-form").forEach((form) => {
+    const chipId = form.closest(".admin-mission-row").dataset.id;
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const patch = {
+        mission: form.mission.value,
+        points: form.points.value,
+        event: form.event.value,
+      };
+      _adminMissionEditing = null;
+      renderAdminMissions(user, chips, eventNames, query);
+      await API.updateMissionChip(user, chipId, patch);
+    });
+    form.querySelector(".chip-delete").addEventListener("click", async () => {
+      if (!confirm(`${chipId} 삭제할까요?`)) return;
+      _adminMissionEditing = null;
+      await API.deleteMissionChip(user, chipId);
+    });
+  });
+
+  const addForm = document.getElementById("chip-add-form");
+  addForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await API.createMissionChip(user, addForm.chipId.value, {
+      mission: addForm.mission.value,
+      points: addForm.points.value,
+      event: addForm.event.value,
+    });
+    if (res && res.error === "id_exists") {
+      alert("이미 있는 ID예요.");
+      return;
+    }
+    addForm.reset();
+  });
+}
+
 async function viewMission(user) {
   $app.innerHTML = `
     <section class="card">
@@ -845,6 +1047,21 @@ async function viewMission(user) {
   document
     .getElementById("scan-btn")
     .addEventListener("click", () => navigate("#/scan"));
+}
+
+// ---------- 뷰 정리(실시간 리스너 구독 해제) ----------
+
+let _activeUnsub = null;
+
+function cleanupView() {
+  if (_activeUnsub) {
+    try {
+      _activeUnsub();
+    } catch (e) {
+      /* noop */
+    }
+    _activeUnsub = null;
+  }
 }
 
 // ---------- QR 스캔 ----------
@@ -989,6 +1206,7 @@ const ROUTES = {
   "#/mission": (user) => viewMission(user),
   "#/scan": (user) => viewScan(user),
   "#/admin": (user) => viewAdmin(user),
+  "#/admin/missions": (user) => viewAdminMissions(user),
 };
 
 // 대회 시작 전(관리자 제외)에도 볼 수 있는 라우트. 그 외는 직접 주소로 들어가도 막힘.
@@ -998,6 +1216,7 @@ async function render() {
   if (location.hash !== "#/scan") {
     stopCamera();
   }
+  cleanupView();
   const user = getUser();
   let hash = location.hash;
 

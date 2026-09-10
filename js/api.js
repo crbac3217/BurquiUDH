@@ -372,6 +372,59 @@ const API = {
     );
   },
 
+  // 미션칩 전체 관리용 — 모든 칩을 실시간으로 구독. unsubscribe 함수를 반환.
+  onMissionChips(callback) {
+    let unsub = () => {};
+    authReady.then(() => {
+      unsub = db.collection("missionChips").onSnapshot(
+        (snap) => {
+          callback(
+            snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+          );
+        },
+        (err) => console.warn("[api] missionChips 구독 실패:", err)
+      );
+    });
+    return () => unsub();
+  },
+
+  // patch: { mission?, points?, event? } 중 바꿀 것만
+  async updateMissionChip(_adminName, chipId, patch) {
+    const clean = {};
+    if (patch.mission !== undefined) clean.mission = String(patch.mission);
+    if (patch.points !== undefined) clean.points = Number(patch.points);
+    if (patch.event !== undefined) clean.event = patch.event || null;
+    return adminWrite(() => db.doc(`missionChips/${chipId}`).update(clean));
+  },
+
+  async createMissionChip(_adminName, chipId, data) {
+    await authReady;
+    if (!(await isAdminNow())) return { success: false, error: "not_admin" };
+    const id = String(chipId).trim();
+    if (!id) return { success: false, error: "no_id" };
+    const ref = db.doc(`missionChips/${id}`);
+    const existing = await ref.get();
+    if (existing.exists) return { success: false, error: "id_exists" };
+    try {
+      await ref.set({
+        mission: String(data.mission || ""),
+        points: Number(data.points) || 0,
+        event: data.event || null,
+        claimedBy: null,
+        claimedAt: null,
+        status: null,
+      });
+      return { success: true };
+    } catch (err) {
+      console.warn("[api] createMissionChip 실패:", err);
+      return { success: false, error: "write_failed" };
+    }
+  },
+
+  async deleteMissionChip(_adminName, chipId) {
+    return adminWrite(() => db.doc(`missionChips/${chipId}`).delete());
+  },
+
   async getPersonalRanking(name) {
     await authReady;
     const settings = await this.getSettings();

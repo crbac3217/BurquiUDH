@@ -72,7 +72,8 @@ input[type="text"],
 input[type="tel"],
 input[type="password"],
 input[type="number"],
-select {
+select,
+textarea {
   padding: 14px 16px;
   border-radius: 14px;
   border: 1px solid rgba(35, 31, 32, 0.15);
@@ -84,12 +85,27 @@ select {
   box-sizing: border-box;
 }
 
+textarea {
+  resize: vertical;
+  line-height: 1.4;
+}
+
 input[type="text"]:focus,
 input[type="tel"]:focus,
 input[type="password"]:focus,
 input[type="number"]:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: #2869fb;
+}
+
+.admin-mission-row.editing {
+  border-color: rgba(40, 105, 251, 0.4);
+  background: rgba(40, 105, 251, 0.06);
+}
+
+#chip-search {
+  margin-bottom: 8px;
 }
 
 input[type="tel"] {
