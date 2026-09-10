@@ -149,6 +149,32 @@ const API = {
     return { ..._settings };
   },
 
+  // 관리자 인식 진단용. 이 기기의 익명 UID와 config/admin에 등록된 UID를 비교.
+  async adminDiag() {
+    const uid = await authReady;
+    _adminUidCache = null; // 항상 최신값 확인
+    const adminUid = await loadAdminUid();
+    return {
+      uid: uid || null,
+      adminUid: adminUid || null,
+      isAdmin: !!uid && uid === adminUid,
+    };
+  },
+
+  // 이 기기를 관리자로 (재)등록. config/admin.uid가 비어있을 때만 규칙상 성공.
+  async reclaimAdmin() {
+    const uid = await authReady;
+    if (!uid) return { success: false, error: "no_auth" };
+    try {
+      await db.doc("config/admin").set({ uid });
+      _adminUidCache = uid;
+      return { success: true };
+    } catch (err) {
+      console.warn("[api] reclaimAdmin 실패:", err);
+      return { success: false, error: "write_failed" };
+    }
+  },
+
   async getEvents() {
     await authReady;
     const snap = await db.collection("events").orderBy("order").get();

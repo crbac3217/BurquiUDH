@@ -644,6 +644,22 @@ button:disabled {
   color: #444;
 }
 
+.admin-section.admin-warn {
+  background: #fff4f4;
+  border: 1px solid #f2b8b8;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 22px;
+}
+
+.admin-warn code {
+  background: rgba(35, 31, 32, 0.08);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.82em;
+  word-break: break-all;
+}
+
 .admin-default-points {
   font-weight: 500;
   color: #2869fb;

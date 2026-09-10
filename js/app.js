@@ -585,20 +585,21 @@ async function viewAdmin(user, feedback) {
   }
   $app.innerHTML = loadingCard("불러오는 중...");
 
-  const [events, settings, names] = await Promise.all([
+  const [events, settings, names, diag] = await Promise.all([
     API.getEvents(),
     API.getSettings(),
     API.getAllowedNames(),
+    API.adminDiag(),
   ]);
 
   const missions = settings.currentEvent
     ? await API.getMissionsByEvent(settings.currentEvent)
     : [];
 
-  renderAdmin(user, events, settings, names, missions, feedback);
+  renderAdmin(user, events, settings, names, missions, feedback, diag);
 }
 
-function renderAdmin(user, events, settings, names, missions, feedback) {
+function renderAdmin(user, events, settings, names, missions, feedback, diag) {
   const currentEventData = events.find((ev) => ev.name === settings.currentEvent);
   const defaultPoints = currentEventData && currentEventData.points ? currentEventData.points : 20;
 
@@ -707,6 +708,19 @@ function renderAdmin(user, events, settings, names, missions, feedback) {
 
       ${feedback ? `<p class="admin-feedback">${escapeHtml(feedback)}</p>` : ""}
 
+      ${
+        diag && !diag.isAdmin
+          ? `<div class="admin-section admin-warn">
+              <p class="admin-section-title">⚠️ 이 기기가 관리자로 등록돼 있지 않아요</p>
+              <p class="hint">이학균으로 로그인은 됐지만, 이 브라우저의 익명 ID가 <code>config/admin</code>에 등록된 ID와 달라서 쓰기가 막혀요. (기기/브라우저를 바꿨거나 사이트 데이터가 지워지면 이렇게 됩니다.)</p>
+              <button type="button" id="reclaim-admin-btn" class="wide-btn">🔑 이 기기를 관리자로 등록</button>
+              <p class="hint">위 버튼이 안 되면(이미 다른 기기가 등록된 경우) Firebase 콘솔 → Firestore → <code>config/admin</code> 문서의 <code>uid</code> 값을 이걸로 바꾸세요:</p>
+              <p><code id="my-uid">${escapeHtml(diag.uid || "(로그인 안 됨)")}</code>
+                 <button type="button" id="copy-uid-btn" class="mini-btn">복사</button></p>
+            </div>`
+          : ""
+      }
+
       <div class="admin-section">
         <p class="admin-section-title">대회 시작 여부</p>
         <button type="button" id="event-started-toggle-btn" class="wide-btn">
@@ -759,6 +773,28 @@ function renderAdmin(user, events, settings, names, missions, feedback) {
       </div>
     </section>
   `;
+
+  const reclaimBtn = document.getElementById("reclaim-admin-btn");
+  if (reclaimBtn) {
+    reclaimBtn.addEventListener("click", async () => {
+      const res = await API.reclaimAdmin();
+      if (res.success) {
+        viewAdmin(user, "이 기기를 관리자로 등록했어요.");
+      } else {
+        alert(
+          "자동 등록에 실패했어요 (이미 다른 기기가 등록돼 있어요).\n" +
+            "Firebase 콘솔에서 config/admin 문서의 uid 값을 아래 ID로 직접 바꿔주세요."
+        );
+      }
+    });
+    document.getElementById("copy-uid-btn").addEventListener("click", () => {
+      const uid = document.getElementById("my-uid").textContent;
+      navigator.clipboard?.writeText(uid).then(
+        () => alert("복사됐어요:\n" + uid),
+        () => alert(uid)
+      );
+    });
+  }
 
   document.getElementById("event-form").addEventListener("submit", async (e) => {
     e.preventDefault();
