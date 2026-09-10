@@ -48,14 +48,19 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ---- 로그인(PIN) : 읽기는 누구나(검증용), pinHash가 아직 없을 때만 1회 설정 가능 ----
+    // ---- 로그인(PIN) ----
+    //   읽기: 누구나(검증용)
+    //   쓰기: pinHash가 아직 없을 때 본인이 1회 설정, 또는 관리자(초기화 포함)
     match /logins/{name} {
       allow read: if signedIn();
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly(["name", "pinHash", "salt"]);
-      allow update: if signedIn()
-        && !("pinHash" in resource.data)
-        && changedKeys().hasOnly(["name", "pinHash", "salt"]);
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && !("pinHash" in resource.data)
+          && changedKeys().hasOnly(["name", "pinHash", "salt"])
+        );
       allow delete: if false;
     }
 

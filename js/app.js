@@ -741,6 +741,10 @@ function renderAdmin(user, events, settings, names, missions, feedback) {
           <span class="menu-icon">🎯</span>
           <span>미션칩 전체 관리 (실시간)</span>
         </a>
+        <a class="menu-item" href="#/admin/pins">
+          <span class="menu-icon">🔑</span>
+          <span>PIN 관리 (초기화)</span>
+        </a>
       </div>
 
       <div class="admin-section">
@@ -1143,6 +1147,58 @@ function renderAdminScores(user, personal, team) {
   });
 }
 
+// ---------- 관리자: PIN 관리 (초기화, 실시간) ----------
+
+async function viewAdminPins(user) {
+  if (user !== ADMIN_NAME) {
+    navigate("#/dashboard");
+    return;
+  }
+  $app.innerHTML = loadingCard("불러오는 중...");
+  _activeUnsub = API.onLogins((logins) => renderAdminPins(user, logins));
+}
+
+function renderAdminPins(user, logins) {
+  const rows = logins
+    .map(
+      (l) => `
+      <li class="admin-mission-row">
+        <div class="admin-mission-text">
+          <span><strong>${escapeHtml(l.name)}</strong></span>
+          <span class="admin-mission-meta">${l.hasPin ? "🔒 PIN 설정됨" : "⚪ PIN 없음 (아직 미설정)"}</span>
+        </div>
+        <div class="admin-mission-actions">
+          ${
+            l.hasPin
+              ? `<button type="button" class="mini-btn status-실패 pin-reset" data-name="${escapeHtml(l.name)}">PIN 초기화</button>`
+              : `<span class="admin-mission-meta">—</span>`
+          }
+        </div>
+      </li>`
+    )
+    .join("");
+
+  $app.innerHTML = `
+    <section class="card">
+      <header class="topbar">
+        <h1>🔑 PIN 관리</h1>
+        <a class="ghost" href="#/admin">← 뒤로</a>
+      </header>
+      <p class="hint">초기화하면 그 사람은 다음 로그인 때 PIN을 새로 설정합니다. (실시간)</p>
+      <ul class="admin-mission-list">${rows}</ul>
+    </section>
+  `;
+
+  $app.querySelectorAll(".pin-reset").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const name = btn.dataset.name;
+      if (!confirm(`${name}님 PIN을 초기화할까요?\n다음 로그인 때 새 PIN을 설정하게 됩니다.`)) return;
+      btn.disabled = true;
+      flashAdminError(await API.resetPin(user, name));
+    });
+  });
+}
+
 async function viewMission(user) {
   $app.innerHTML = `
     <section class="card">
@@ -1349,6 +1405,7 @@ const ROUTES = {
   "#/admin": (user) => viewAdmin(user),
   "#/admin/missions": (user) => viewAdminMissions(user),
   "#/admin/scores": (user) => viewAdminScores(user),
+  "#/admin/pins": (user) => viewAdminPins(user),
 };
 
 // 대회 시작 전(관리자 제외)에도 볼 수 있는 라우트. 그 외는 직접 주소로 들어가도 막힘.

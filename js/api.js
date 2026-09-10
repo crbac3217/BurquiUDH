@@ -5,6 +5,7 @@ firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
 const auth = firebase.auth();
 const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
+const deleteField = firebase.firestore.FieldValue.delete;
 
 // 익명 로그인 — 보안 규칙이 request.auth를 요구하므로, 모든 요청 전에 이게 끝나야 합니다.
 const authReady = auth
@@ -494,6 +495,34 @@ const API = {
   async deleteScoreEntry(_adminName, kind, id) {
     const col = kind === "team" ? "teamScores" : "personalScores";
     return adminWrite(() => db.doc(`${col}/${id}`).delete());
+  },
+
+  // PIN 관리용 — 로그인 문서들을 실시간 구독. [{ name, hasPin }] 로 콜백. unsubscribe 반환.
+  onLogins(callback) {
+    let unsub = () => {};
+    authReady.then(() => {
+      unsub = db.collection("logins").onSnapshot(
+        (snap) => {
+          callback(
+            snap.docs
+              .map((d) => ({ name: d.id, hasPin: !!d.data().pinHash }))
+              .sort((a, b) => a.name.localeCompare(b.name, "ko"))
+          );
+        },
+        (err) => console.warn("[api] logins 구독 실패:", err)
+      );
+    });
+    return () => unsub();
+  },
+
+  // 관리자가 특정 사람 PIN 초기화 → 다음 로그인 때 새로 설정하게 됨.
+  async resetPin(_adminName, name) {
+    return adminWrite(() =>
+      db.doc(`logins/${name}`).update({
+        pinHash: deleteField(),
+        salt: deleteField(),
+      })
+    );
   },
 
   async getPersonalRanking(name) {
