@@ -249,11 +249,15 @@ async function viewDashboard(user) {
           </div>
           <button class="ghost" id="logout-btn">로그아웃</button>
         </header>
-        <p class="current-event-banner">🚦 대회가 아직 시작되지 않았어요. 시작 전엔 우리팀만 볼 수 있어요.</p>
+        <p class="current-event-banner">🚦 대회가 아직 시작되지 않았어요. 시작 전엔 우리팀·준비물만 볼 수 있어요.</p>
         <nav class="menu">
           <a class="menu-item" href="#/team">
             <span class="menu-icon">👥</span>
             <span>우리팀 보기</span>
+          </a>
+          <a class="menu-item" href="#/supplies">
+            <span class="menu-icon">🎒</span>
+            <span>준비물</span>
           </a>
         </nav>
       </section>
@@ -269,6 +273,14 @@ async function viewDashboard(user) {
           <span>개인 랭킹${settings.personalRankingVisible ? "" : " (비공개 미리보기)"}</span>
         </a>`
       : "";
+
+  // 준비물 시트는 대회 시작 전에만 노출.
+  const suppliesMenuItem = !settings.eventStarted
+    ? `<a class="menu-item" href="#/supplies">
+        <span class="menu-icon">🎒</span>
+        <span>준비물</span>
+      </a>`
+    : "";
 
   $app.innerHTML = `
     <section class="card">
@@ -291,6 +303,7 @@ async function viewDashboard(user) {
           <span class="menu-icon">👥</span>
           <span>우리팀 보기</span>
         </a>
+        ${suppliesMenuItem}
         <a class="menu-item" href="#/scores">
           <span class="menu-icon">🏆</span>
           <span>팀 점수판</span>
@@ -345,6 +358,45 @@ async function viewMyTeam(user) {
         <a class="ghost" href="#/dashboard">← 뒤로</a>
       </header>
       ${list}
+    </section>
+  `;
+}
+
+async function viewSupplies(user) {
+  const groups = typeof SUPPLIES !== "undefined" ? SUPPLIES : [];
+  const mine = groups.find((g) => g.who === user);
+
+  const groupHtml = (g, highlight) => `
+    <div class="supply-group${highlight ? " mine" : ""}">
+      <p class="supply-who">${escapeHtml(g.who)}${g.who === user ? " (나)" : ""}${
+        g.who === "전원" ? " 공통" : ""
+      }</p>
+      <ul class="supply-items">
+        ${g.items.map((it) => `<li>${escapeHtml(it)}</li>`).join("")}
+      </ul>
+    </div>`;
+
+  const mineBlock = mine
+    ? `<div class="admin-section"><p class="admin-section-title">내가 챙길 것</p>${groupHtml(
+        mine,
+        true
+      )}</div>`
+    : "";
+
+  const allBlock = groups.map((g) => groupHtml(g, false)).join("");
+
+  $app.innerHTML = `
+    <section class="card">
+      <header class="topbar">
+        <h1>🎒 준비물</h1>
+        <a class="ghost" href="#/dashboard">← 뒤로</a>
+      </header>
+      <p class="hint">대회가 시작되면 이 화면은 볼 수 없어요. 시작 전에 각자 챙겨오세요.</p>
+      ${mineBlock}
+      <div class="admin-section">
+        <p class="admin-section-title">전체 목록</p>
+        ${allBlock || '<p class="empty">준비물 목록이 아직 없어요.</p>'}
+      </div>
     </section>
   `;
 }
@@ -1420,6 +1472,7 @@ const ROUTES = {
   "#/my-score": (user) => viewMyScore(user),
   "#/ranking": (user) => viewPersonalRanking(user),
   "#/mission": (user) => viewMission(user),
+  "#/supplies": (user) => viewSupplies(user),
   "#/scan": (user) => viewScan(user),
   "#/admin": (user) => viewAdmin(user),
   "#/admin/missions": (user) => viewAdminMissions(user),
@@ -1454,7 +1507,14 @@ async function render() {
     return;
   }
 
-  if (user !== ADMIN_NAME && !ALWAYS_ALLOWED_ROUTES.includes(hash)) {
+  // 준비물 시트는 시작 전에만(관리자 포함 전원). 시작하면 못 봄.
+  if (hash === "#/supplies") {
+    const { eventStarted } = await API.getSettings();
+    if (eventStarted) {
+      location.hash = "#/dashboard";
+      return;
+    }
+  } else if (user !== ADMIN_NAME && !ALWAYS_ALLOWED_ROUTES.includes(hash)) {
     const { eventStarted } = await API.getSettings();
     if (!eventStarted && hash !== "#/dashboard") {
       location.hash = "#/dashboard";
