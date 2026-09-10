@@ -686,9 +686,13 @@ function renderAdmin(user, events, settings, names, missions, feedback, diag) {
     )
     .join("");
 
-  const nameOptions = names
-    .map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`)
-    .join("");
+  const nameOptions =
+    names
+      .map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`)
+      .join("") +
+    `<option disabled>──────</option>` +
+    `<option value="__team_흑팀">🖤 흑팀 전원</option>` +
+    `<option value="__team_백팀">🤍 백팀 전원</option>`;
 
   const STATUS_BUTTONS = ["진행중", "성공", "실패"];
   const missionRows = missions.length
@@ -884,20 +888,23 @@ function renderAdmin(user, events, settings, names, missions, feedback, diag) {
   });
 
   // 개인점수(등수·개인상 포함)는 바로 서버로 전송합니다.
+  // 대상이 "__team_흑팀" / "__team_백팀" 이면 그 팀 전원에게 각각 개인점수를 줍니다.
   document.getElementById("personal-score-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = e.target;
     const btn = f.querySelector("button[type=submit]");
-    const targetName = f.who.value;
+    const target = f.who.value;
     const note = f.note.value;
     const points = Number(f.points.value);
     btn.disabled = true;
     btn.textContent = "등록 중...";
-    if (
-      flashAdminError(
-        await API.addPersonalScore(user, targetName, settings.currentEvent, note, points)
-      )
-    ) {
+
+    const teamMatch = target.startsWith("__team_") ? target.slice("__team_".length) : null;
+    const res = teamMatch
+      ? await API.addPersonalScoreForTeam(user, teamMatch, settings.currentEvent, note, points)
+      : await API.addPersonalScore(user, target, settings.currentEvent, note, points);
+
+    if (flashAdminError(res)) {
       btn.disabled = false;
       btn.textContent = "등록";
       return;
@@ -908,7 +915,9 @@ function renderAdmin(user, events, settings, names, missions, feedback, diag) {
       settings,
       names,
       missions,
-      `${targetName} · ${note} ${points}점 등록했어요.`
+      teamMatch
+        ? `${teamMatch} 전원에게 · ${note} ${points}점 등록했어요.`
+        : `${target} · ${note} ${points}점 등록했어요.`
     );
   });
 

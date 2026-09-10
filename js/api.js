@@ -412,6 +412,27 @@ const API = {
     );
   },
 
+  // 한 팀 전원에게 같은 개인점수를 한 번에 부여.
+  async addPersonalScoreForTeam(_adminName, team, event, note, points) {
+    return adminWrite(async () => {
+      const snap = await db
+        .collection("participants")
+        .where("team", "==", team)
+        .get();
+      const batch = db.batch();
+      snap.docs.forEach((d) => {
+        batch.set(db.collection("personalScores").doc(), {
+          name: d.id,
+          event,
+          note,
+          points: Number(points),
+          ts: serverTimestamp(),
+        });
+      });
+      await batch.commit();
+    });
+  },
+
   async getMissionsByEvent(eventName) {
     await authReady;
     const snap = await db
