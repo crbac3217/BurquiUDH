@@ -607,18 +607,38 @@ async function viewPersonalRanking(user) {
     return;
   }
 
+  renderPersonalRankingList(user, ranking);
+}
+
+// 이름을 누르면 그 사람이 어디서 점수를 얻었는지 펼쳐 보여줍니다(팀 점수판과 같은 패턴).
+function renderPersonalRankingList(user, ranking, expandedName) {
   const rows = ranking.length
     ? ranking
-        .map(
-          (r, i) => `
-        <li class="score-row-wrap">
-          <div class="score-row${r.name === user ? " me" : ""}">
-            <span class="rank">${i + 1}</span>
-            <span class="person-name">${escapeHtml(r.name)}</span>
-            <span class="score">${r.total}점</span>
-          </div>
-        </li>`
-        )
+        .map((r, i) => {
+          const isOpen = r.name === expandedName;
+          const breakdown = r.breakdown && r.breakdown.length
+            ? r.breakdown
+                .map(
+                  (e) => `
+              <li class="score-detail-row">
+                <span class="detail-event">${e.event}</span>
+                <span class="detail-note">${e.note}</span>
+                <span class="detail-points">${e.points}점</span>
+              </li>`
+                )
+                .join("")
+            : `<li class="score-detail-row"><span class="detail-note">아직 점수 내역이 없어요.</span></li>`;
+          return `
+            <li class="score-row-wrap">
+              <button class="score-row${r.name === user ? " me" : ""}" data-idx="${i}">
+                <span class="rank">${i + 1}</span>
+                <span class="person-name">${escapeHtml(r.name)}</span>
+                <span class="score">${r.total}점</span>
+                <span class="chevron">${isOpen ? "▲" : "▼"}</span>
+              </button>
+              ${isOpen ? `<ul class="score-breakdown">${breakdown}</ul>` : ""}
+            </li>`;
+        })
         .join("")
     : `<p class="empty">아직 등록된 점수가 없어요.</p>`;
 
@@ -631,6 +651,14 @@ async function viewPersonalRanking(user) {
       <ul class="score-list">${rows}</ul>
     </section>
   `;
+
+  $app.querySelectorAll(".score-row").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = Number(btn.dataset.idx);
+      const name = ranking[idx].name;
+      renderPersonalRankingList(user, ranking, name === expandedName ? null : name);
+    });
+  });
 }
 
 // ---------- 관리자(이학균) 패널 ----------

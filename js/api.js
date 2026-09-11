@@ -609,6 +609,8 @@ const API = {
     );
   },
 
+  // ranking의 각 항목에 breakdown(어디서 몇 점 얻었는지)도 같이 담아서 반환.
+  // 이미 전체 데이터를 다 읽은 김에 클라이언트에서 바로 펼쳐볼 수 있게 함(추가 요청 없음).
   async getPersonalRanking(name) {
     await authReady;
     const settings = await this.getSettings();
@@ -624,27 +626,52 @@ const API = {
 
     const teamOf = {};
     const totals = {};
+    const breakdown = {};
+    const participants = {};
     partSnap.forEach((d) => {
-      teamOf[d.id] = d.data().team;
+      const data = d.data();
+      participants[d.id] = data;
+      teamOf[d.id] = data.team;
       totals[d.id] = 0;
+      breakdown[d.id] = [];
     });
     pSnap.forEach((d) => {
       const x = d.data();
-      if (x.name in totals) totals[x.name] += Number(x.points || 0);
+      if (x.name in totals) {
+        const pts = Number(x.points || 0);
+        totals[x.name] += pts;
+        breakdown[x.name].push({ event: escHtml(x.event), note: escHtml(x.note), points: pts });
+      }
     });
     mSnap.forEach((d) => {
       const x = d.data();
       if (x.status === "성공" && x.claimedBy in totals) {
-        totals[x.claimedBy] += Number(x.points || 0);
+        const pts = Number(x.points || 0);
+        totals[x.claimedBy] += pts;
+        breakdown[x.claimedBy].push({
+          event: "개인미션",
+          note: resolveMissionText(x.mission, participants[x.claimedBy], true),
+          points: pts,
+        });
       }
     });
     tSnap.forEach((d) => {
       const x = d.data();
-      for (const n in totals) if (teamOf[n] === x.team) totals[n] += Number(x.points || 0);
+      const pts = Number(x.points || 0);
+      for (const n in totals) {
+        if (teamOf[n] === x.team) {
+          totals[n] += pts;
+          breakdown[n].push({
+            event: escHtml(x.event),
+            note: escHtml(x.note) + " (우리팀)",
+            points: pts,
+          });
+        }
+      }
     });
 
     const ranking = Object.entries(totals)
-      .map(([n, t]) => ({ name: n, total: t }))
+      .map(([n, t]) => ({ name: n, total: t, breakdown: breakdown[n] }))
       .sort((a, b) => b.total - a.total);
     return { visible: true, ranking };
   },
