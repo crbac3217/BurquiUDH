@@ -424,8 +424,9 @@ button:disabled {
 
 .score-detail-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 2px 10px;
   padding: 10px 16px 10px 46px;
   background: rgba(255, 255, 255, 0.35);
   border-radius: 12px;
@@ -434,17 +435,23 @@ button:disabled {
 
 .detail-event {
   font-weight: 600;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .detail-note {
   color: #555;
+  /* 비고(특히 히든미션 문구)가 길어서 이벤트 라벨이랑 좁은 공간을 두고 다투면
+     한 글자만 남고 잘려 보이는 문제가 있었음. flex-wrap 컨테이너 안에서
+     항상 자기 줄로 내려가서 전체 너비로 자연스럽게 줄바꿈되게 함. */
+  flex: 1 1 100%;
+  min-width: 0;
 }
 
 .detail-points {
   font-weight: 700;
   color: #2869fb;
-  width: 50px;
+  flex: 0 0 auto;
   text-align: right;
 }
 
