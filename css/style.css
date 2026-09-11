@@ -360,8 +360,9 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 60vh;
-  overflow-y: auto;
+  /* 예전엔 60vh로 내부 스크롤을 가뒀는데, 개인 랭킹처럼 행을 펼치면
+     내부 스크롤 영역이 잘려서 안 보이는 문제가 있었음. 그냥 페이지 전체가
+     스크롤되게 높이 제한을 풀었음. */
 }
 
 .score-row-wrap {
