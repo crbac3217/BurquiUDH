@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>운동회 앱</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>" />
-  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    // css는 js와 달리 캐시 버스팅이 안 걸려 있어서 브라우저/CDN에 옛날 스타일이
+    // 계속 캐시되는 문제가 있었음. js와 똑같이 매번 새 쿼리스트링을 붙여서 로드.
+    document.write('<link rel="stylesheet" href="css/style.css?v=' + Date.now() + '">');
+  </script>
 </head>
 <body>
   <div id="app"></div>
